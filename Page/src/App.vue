@@ -15,7 +15,9 @@ export default{
     let totalprice = ref(0)
     onMounted(()=>{
       console.log("HI")
-      axios.get("/src/test/test.json")
+      axios.get("https://localhost:7096/api/Order/Detail",{params: {
+    product_name: "??BYE" // 在這裡設定參數
+  }})
       .then(res=>{
         console.log(res)
         information.value = res.data
@@ -62,7 +64,7 @@ export default{
     <div class="layout-body" v-show="groupshoppingDisplay">
       <div class="layout-body-content">
         <div class="layout-body-content-left">
-          <img src="./img/example.jpg" alt="">
+          <img src="./img/hamburger.jpg" alt="">
         </div>
         <div class="layout-body-content-right">
           <div>{{ information.product }}</div>
@@ -91,7 +93,7 @@ export default{
           </thead>
           <tbody>
             <tr v-for="list in information.memberData">
-              <td>{{ list.name }}</td>
+              <td>{{ list.member }}</td>
               <td>{{ list.qty }}</td>
             </tr>
           </tbody>

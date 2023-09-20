@@ -3,6 +3,18 @@ using API.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
+//CORS setting
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("MyAllowedOrigins",
+        policy =>
+        {
+            policy.WithOrigins("*") // note the port is included 
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+        });
+});
+
 // Add services to the container.
 
 builder.Services.AddControllers();
@@ -18,6 +30,9 @@ builder.Services.AddDbContext<GoShopContext>(options =>
 // Add services to the container.
 
 var app = builder.Build();
+
+//CORS setting
+app.UseCors("MyAllowedOrigins");
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

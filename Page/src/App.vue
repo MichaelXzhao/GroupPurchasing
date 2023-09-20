@@ -15,7 +15,7 @@ export default{
     let totalprice = ref(0)
     onMounted(()=>{
       console.log("HI")
-      axios.get("https://localhost:7096/api/Order/Detail",{params: {
+      axios.get("http://localhost:9191/api/Order/Detail",{params: {
     product_name: "??BYE" // 在這裡設定參數
   }})
       .then(res=>{

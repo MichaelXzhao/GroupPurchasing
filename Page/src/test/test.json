@@ -1,0 +1,14 @@
+{
+    "product":"超吉BYE",
+    "price":200,
+    "memberData":[
+        {
+            "name":"Micheal",
+            "qty":2
+        },
+        {
+            "name":"Irene",
+            "qty":4
+        }
+    ]
+}

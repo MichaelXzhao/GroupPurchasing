@@ -1,5 +1,6 @@
 <script>
 import { onMounted, ref } from 'vue';
+import axios from 'axios';
 
 export default{
   setup(){
@@ -9,12 +10,30 @@ export default{
       profileDisplay.value = false
       groupshoppingDisplay.value = true
     }
+    let information = ref({})
+    let totalqty = ref(0)
+    let totalprice = ref(0)
     onMounted(()=>{
       console.log("HI")
+      axios.get("/src/test/test.json")
+      .then(res=>{
+        console.log(res)
+        information.value = res.data
+        res.data.memberData.forEach(element => {
+          totalqty.value = totalqty.value + element.qty
+          totalprice.value = totalqty.value * res.data.price
+        });
+      })
+      .catch(err=>{
+        console.log(err)
+      })
     })
     return {
       profileDisplay, 
       groupshoppingDisplay,
+      information,
+      totalqty,
+      totalprice,
       clickSureButton 
     }
   }
@@ -46,18 +65,39 @@ export default{
           <img src="./img/example.jpg" alt="">
         </div>
         <div class="layout-body-content-right">
-          <div>溫層測試-冷藏</div>
-          <div class="layout-body-content-right-price">NT$1 ~ NT$10</div>
+          <div>{{ information.product }}</div>
+          <div class="layout-body-content-right-price">NT${{ information.price }}</div>
           <div>
             <div>數量</div>
             <div class="qty-wrapper">
               <div class="qty-wrapper-minus">-</div>
               <div>
-                <input type="number">
+                <input type="number" value="1">
               </div>
               <div class="qty-wrapper-plus">+</div>
             </div>
           </div>
+        </div>
+      </div>
+    </div>
+    <div class="member-list" v-show="groupshoppingDisplay">
+      <div class="member-list-content">
+        <table>
+          <thead>
+            <tr>
+              <th>姓名</th>
+              <th>數量</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="list in information.memberData">
+              <td>{{ list.name }}</td>
+              <td>{{ list.qty }}</td>
+            </tr>
+          </tbody>
+        </table>
+        <div>
+          共{{ totalqty }}件,{{totalprice}}元
         </div>
       </div>
     </div>
@@ -130,5 +170,18 @@ export default{
   border-left: 1px solid #DDD;
   width: 20px;
   height: 20px;
+  text-align: center;
+}
+
+.member-list{
+  height: 100vh;
+}
+
+.member-list-content{
+  height: 100%;
+}
+
+td{
+  text-align: center;
 }
 </style>

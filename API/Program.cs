@@ -10,7 +10,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-//DB
+//Irene DB
 DotNetEnv.Env.Load();
 // setting DbContext db connection
 builder.Services.AddDbContext<GoShopContext>(options =>

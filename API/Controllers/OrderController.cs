@@ -49,7 +49,7 @@ namespace API.Controllers
                 qty=input.product_qty,
                 price=input.price,
                 product=input.product,
-                picture=$"./img/{input.product}.jpg"
+                picture=$"./src/img/{input.product}.jpg"
             };
             
             _dbcontext.Orders.Add(newOrders);

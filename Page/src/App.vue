@@ -6,21 +6,56 @@ export default{
   setup(){
     let profileDisplay = ref(true)
     let groupshoppingDisplay = ref(false)
-    let clickSureButton = ()=>{
-      profileDisplay.value = false
-      groupshoppingDisplay.value = true
-    }
     let information = ref({})
     let totalqty = ref(0)
     let totalprice = ref(0)
+    let productIMG = ref("")
+    let username = ref("")
+    let orderqty = ref(1)
+    let clickSureButton = ()=>{
+      profileDisplay.value = false
+      groupshoppingDisplay.value = true
+      console.log(username.value)
+    }
+    let joinGroup = ()=>{
+      console.log(username.value)
+      console.log(orderqty.value)
+      axios.post("http://localhost:9191/api/Order/add",
+      {
+        "user_name": username.value,
+        "product_qty": orderqty.value,
+        "price": information.value.price,
+        "product": information.value.product
+      })
+      .then(res=>{
+        console.log(res)
+      })
+      .catch(err=>{
+        console.log(err)
+      })
+    }
     onMounted(()=>{
-      console.log("HI")
+      let url = window.location.href;
+      var queryString = url.split('?')[1];
+      console.log(queryString)
+      // 使用split()方法分割查询字符串并解析参数
+      var paramArray = queryString.split('&');
+      // 创建一个对象来存储参数
+      var params = {};
+      for (var i = 0; i < paramArray.length; i++) {
+        var param = paramArray[i].split('=');
+        params[param[0]] = decodeURIComponent(param[1]);
+      }
+      // 获取特定参数的值
+      var paramValue = params['product'];
+      console.log(paramValue)
       axios.get("http://localhost:9191/api/Order/Detail",{params: {
-    product_name: "??BYE" // 在這裡設定參數
-  }})
+        product_name: paramValue // 在這裡設定參數
+      }})
       .then(res=>{
         console.log(res)
         information.value = res.data
+        productIMG.value = res.data.picture
         res.data.memberData.forEach(element => {
           totalqty.value = totalqty.value + element.qty
           totalprice.value = totalqty.value * res.data.price
@@ -36,7 +71,11 @@ export default{
       information,
       totalqty,
       totalprice,
-      clickSureButton 
+      productIMG,
+      username,
+      orderqty,
+      clickSureButton,
+      joinGroup
     }
   }
 }
@@ -52,7 +91,7 @@ export default{
         <h2>填寫基本資料</h2>
         <form class="login-form">
           <p>
-            <input type="text" class="username" placeholder="姓名">
+            <input type="text" class="username" placeholder="姓名" v-model="username">
           </p>
           <p>
             <div class="sure-button" v-on:click="clickSureButton
@@ -74,10 +113,11 @@ export default{
             <div class="qty-wrapper">
               <div class="qty-wrapper-minus">-</div>
               <div>
-                <input type="number" value="1">
+                <input type="number" v-model="orderqty">
               </div>
               <div class="qty-wrapper-plus">+</div>
             </div>
+            <button v-on:click="joinGroup">加入團購</button>
           </div>
         </div>
       </div>

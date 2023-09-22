@@ -89,7 +89,7 @@ namespace API.Controllers
                 qty = order.qty,
             }).ToList(); 
 
-            return Ok(new { product = orders[0].product, price = orders[0].price, picture=orders[0].picture, memberData }); 
+            return Ok(new { product = orders[0].product, price = orders[0].price, picture=orders[0].picture, salepageid =orders[0].salepageid, shopid=orders[0].shopid, skuid=orders[0].skuid, memberData }); 
         }
 
 

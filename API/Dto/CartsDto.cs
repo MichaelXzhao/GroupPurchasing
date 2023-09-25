@@ -1,7 +1,7 @@
 public class CartInsertRequestDto
 {
-    public int shopId { get; set; }
-    public int salePageId { get; set; }
-    public int saleProductSKUid { get; set; }
+    public string shopId { get; set; }
+    public string salePageId { get; set; }
+    public string saleProductSKUid { get; set; }
     public int qty { get; set; }
 }

@@ -264,7 +264,7 @@ namespace API.Controllers
 
                 // 讀取回傳response
                 string responseCheckOrderContent = await responseCheckOrder.Content.ReadAsStringAsync();
-                Console.WriteLine(responseCheckOrderContent);
+                //Console.WriteLine(responseCheckOrderContent);
                 JObject jsonCheckOrderResponse = JObject.Parse(responseCheckOrderContent);
                 OrderCode = jsonCheckOrderResponse["Data"]["TradesOrderGroupList"][0]["Code"].ToString();
                 Console.WriteLine("訂單編號: "+OrderCode);

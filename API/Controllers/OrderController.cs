@@ -87,7 +87,50 @@ namespace API.Controllers
                 qty = order.qty,
             }).ToList(); 
 
-            return Ok(new { product = orders[0].product, price = orders[0].price, picture=orders[0].picture, salepageid =orders[0].salepageid, shopid=orders[0].shopid, skuid=orders[0].skuid, memberData }); 
+            Console.WriteLine("order:"+orders[0]);
+
+            // 加總所有的商品數
+            var totalQty = memberData.Sum(member => member.qty);
+            string totalQtyString = totalQty.ToString();
+
+            // (2) [POST] Calculate 根據每次加總件數，再去打折扣API
+                HttpClient Calculateclient = new HttpClient();
+                HttpRequestMessage Calculaterequest = new HttpRequestMessage()
+                {
+                    Method = HttpMethod.Post,
+                    RequestUri = new Uri("https://10230.shop.qa.91dev.tw/webapi//PromotionEngine/Calculate"),
+                };
+
+                // payload格式要注意，反斜線也要顯示
+                string CalculaterequestBody = "{\"promotionDetailDiscount\":\"{\\\"ShopId\\\":10230,\\\"PromotionId\\\":\\\"21302\\\",\\\"SalePageList\\\":[{\\\"Price\\\":"+orders[0].price.ToString() +",\\\"Qty\\\":"+ totalQtyString +",\\\"SalePageId\\\":"+ orders[0].salepageid +",\\\"SaleProductSKUId\\\":"+ orders[0].skuid +",\\\"TagIds\\\":[\\\"20769\\\",\\\"22311\\\"]}]}\",\"source\":\"Web\"}";
+                Calculaterequest.Content = new StringContent(CalculaterequestBody, Encoding.UTF8, "application/json");
+                HttpResponseMessage Calculateresponse = await Calculateclient.SendAsync(Calculaterequest);
+                string CalculateresponseContent = await Calculateresponse.Content.ReadAsStringAsync();
+                JObject CalculatejsonResponse = JObject.Parse(CalculateresponseContent);
+                //Console.WriteLine("Response JSON: {0}", jsonResponse);
+
+                string TotalQty = CalculatejsonResponse["Data"]["TotalQty"].ToString();
+                string TotalPrice = CalculatejsonResponse["Data"]["TotalPrice"].ToString();
+                string TotalOriginalPrice = CalculatejsonResponse["Data"]["TotalOriginalPrice"].ToString();
+                string PromotionDiscount = CalculatejsonResponse["Data"]["PromotionDiscount"].ToString();
+                string PromotionConditionTitle = CalculatejsonResponse["Data"]["PromotionConditionTitle"].ToString();
+                string PromotionDiscountTitle = CalculatejsonResponse["Data"]["PromotionDiscountTitle"].ToString();
+                string RecommendConditionTitle = CalculatejsonResponse["Data"]["RecommendConditionTitle"].ToString();          
+
+                //回傳所有折扣API相關資料
+                var discountData = new
+                {
+                    TotalQty,
+                    TotalPrice,
+                    TotalOriginalPrice,
+                    PromotionDiscount,
+                    PromotionConditionTitle,
+                    PromotionDiscountTitle,
+                    RecommendConditionTitle
+                };
+
+
+            return Ok(new { product = orders[0].product, price = orders[0].price, picture=orders[0].picture, salepageid =orders[0].salepageid, shopid=orders[0].shopid, skuid=orders[0].skuid, memberData, discountData }); 
         }
 
 
@@ -141,7 +184,7 @@ namespace API.Controllers
                 // 加總所有的商品數
                 var totalQty = memberData.Sum(member => member.qty);
                 string totalQtyString = totalQty.ToString();
-                Console.WriteLine("total:"+totalQty);
+                //Console.WriteLine("total:"+totalQty);
 
 
                 // [POST] Calculate 根據每次加總件數，再去打折扣API
@@ -158,7 +201,7 @@ namespace API.Controllers
                 HttpResponseMessage response = await client.SendAsync(request);
                 string responseContent = await response.Content.ReadAsStringAsync();
                 JObject jsonResponse = JObject.Parse(responseContent);
-                Console.WriteLine("Response JSON: {0}", jsonResponse);
+                //Console.WriteLine("Response JSON: {0}", jsonResponse);
 
                 string TotalQty = jsonResponse["Data"]["TotalQty"].ToString();
                 string TotalPrice = jsonResponse["Data"]["TotalPrice"].ToString();

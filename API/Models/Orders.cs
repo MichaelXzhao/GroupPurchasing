@@ -17,9 +17,9 @@ public partial class Orders
 
     public string? member { get; set; }
 
-    public int? salepageid { get; set; }
+    public string? salepageid { get; set; }
 
-    public int? shopid { get; set; }
+    public string? shopid { get; set; }
 
-    public int? skuid { get; set; }
+    public string? skuid { get; set; }
 }

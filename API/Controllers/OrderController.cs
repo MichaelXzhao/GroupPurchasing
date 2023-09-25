@@ -6,6 +6,7 @@ using API.Models;
 using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json.Linq;
 using System.Text;
+using Newtonsoft.Json;
 
 
 namespace API.Controllers
@@ -22,10 +23,10 @@ namespace API.Controllers
         }
 
         [HttpGet("Detail")]
-        public async Task<ActionResult> GetCartDetail(int salepageid)
+        public async Task<ActionResult> GetCartDetail(string salepageid)
         {
             var existingsalepageid = await _dbcontext.Orders
-                    .FirstOrDefaultAsync(o => o.salepageid == salepageid);
+                    .FirstOrDefaultAsync(o => o.salepageid.Equals(salepageid));
             if(existingsalepageid==null){
                 // (1)product/detail
                 HttpClient client = new HttpClient();
@@ -46,16 +47,13 @@ namespace API.Controllers
                 JObject jsonResponse = JObject.Parse(responseContent);
             
                 // 抓取商品資訊
-                string salepageidStr = jsonResponse["Data"]["Id"].ToString();
-                int nineyi_salepageid = Convert.ToInt32(salepageidStr);
-                string shopidStr = jsonResponse["Data"]["ShopId"].ToString();
-                int nineyi_shopid = Convert.ToInt32(shopidStr);
+                string nineyi_salepageid = jsonResponse["Data"]["Id"].ToString();
+                string nineyi_shopid = jsonResponse["Data"]["ShopId"].ToString();
                 string nineyi_title = jsonResponse["Data"]["Title"].ToString();
                 string priceStr = jsonResponse["Data"]["Price"].ToString();
                 int nineyi_price = Convert.ToInt32(priceStr);
                 string nineyi_picurl = jsonResponse["Data"]["ImageList"][0]["PicUrl"].ToString();
-                string skuStr = jsonResponse["Data"]["SaleProductSKUIdList"][0].ToString();
-                int nineyi_sku = Convert.ToInt32(skuStr);
+                string nineyi_sku = jsonResponse["Data"]["SaleProductSKUIdList"][0].ToString();
 
                 //儲存到DB
                 var newOrders= new Orders{
@@ -75,7 +73,7 @@ namespace API.Controllers
 
             
             var orders = await _dbcontext.Orders
-                .Where(o => o.salepageid == salepageid)
+                .Where(o => o.salepageid.Equals(salepageid))
                 .ToListAsync(); // 獲取所有符合的訂單
 
             if (orders == null || orders.Count == 0)
@@ -140,7 +138,49 @@ namespace API.Controllers
                     qty = order.qty,
                 }).ToList(); 
 
-                return Ok(new { product = orders[0].product, price = orders[0].price, picture=orders[0].picture, memberData });
+                // 加總所有的商品數
+                var totalQty = memberData.Sum(member => member.qty);
+                string totalQtyString = totalQty.ToString();
+                Console.WriteLine("total:"+totalQty);
+
+
+                // [POST] Calculate 根據每次加總件數，再去打折扣API
+                HttpClient client = new HttpClient();
+                HttpRequestMessage request = new HttpRequestMessage()
+                {
+                    Method = HttpMethod.Post,
+                    RequestUri = new Uri("https://10230.shop.qa.91dev.tw/webapi//PromotionEngine/Calculate"),
+                };
+
+                // payload格式要注意，反斜線也要顯示
+                string requestBody = "{\"promotionDetailDiscount\":\"{\\\"ShopId\\\":10230,\\\"PromotionId\\\":\\\"21302\\\",\\\"SalePageList\\\":[{\\\"Price\\\":"+input.price.ToString() +",\\\"Qty\\\":"+ totalQtyString +",\\\"SalePageId\\\":"+ input.salepageid +",\\\"SaleProductSKUId\\\":"+ input.skuid +",\\\"TagIds\\\":[\\\"20769\\\",\\\"22311\\\"]}]}\",\"source\":\"Web\"}";
+                request.Content = new StringContent(requestBody, Encoding.UTF8, "application/json");
+                HttpResponseMessage response = await client.SendAsync(request);
+                string responseContent = await response.Content.ReadAsStringAsync();
+                JObject jsonResponse = JObject.Parse(responseContent);
+                Console.WriteLine("Response JSON: {0}", jsonResponse);
+
+                string TotalQty = jsonResponse["Data"]["TotalQty"].ToString();
+                string TotalPrice = jsonResponse["Data"]["TotalPrice"].ToString();
+                string TotalOriginalPrice = jsonResponse["Data"]["TotalOriginalPrice"].ToString();
+                string PromotionDiscount = jsonResponse["Data"]["PromotionDiscount"].ToString();
+                string PromotionConditionTitle = jsonResponse["Data"]["PromotionConditionTitle"].ToString();
+                string PromotionDiscountTitle = jsonResponse["Data"]["PromotionDiscountTitle"].ToString();
+                string RecommendConditionTitle = jsonResponse["Data"]["RecommendConditionTitle"].ToString();          
+
+                //回傳所有折扣API相關資料
+                var discountData = new
+                {
+                    TotalQty,
+                    TotalPrice,
+                    TotalOriginalPrice,
+                    PromotionDiscount,
+                    PromotionConditionTitle,
+                    PromotionDiscountTitle,
+                    RecommendConditionTitle
+                };
+
+                return Ok(new { product = orders[0].product, price = orders[0].price, picture=orders[0].picture, memberData, discountData });
             }
             catch (Exception ex)
             {

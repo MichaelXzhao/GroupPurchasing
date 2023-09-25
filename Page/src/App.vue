@@ -12,6 +12,9 @@ export default{
     let productIMG = ref("")
     let username = ref("")
     let orderqty = ref(1)
+    let paramValue = ref("")
+    let orderResultDisplay = ref(false)
+    let orderNumber = ref("")
     let clickSureButton = ()=>{
       profileDisplay.value = false
       groupshoppingDisplay.value = true
@@ -25,16 +28,60 @@ export default{
         "user_name": username.value,
         "product_qty": orderqty.value,
         "price": information.value.price,
-        "product": information.value.product
+        "product": information.value.product,
+        "picture":"//img-temp.qa.91dev.tw/webapi/imagesV3/Original/SalePage/885704/0/638303045654930000?v=1",
+        "salepageid":885704,
+        "shopid":10230,
+        "skuid":1273384
       })
       .then(res=>{
         console.log(res)
+        axios.get("http://localhost:9191/api/Order/Detail",{params: {
+          salepageid: paramValue.value // 在這裡設定參數
+        }})
+        .then(res=>{
+          totalqty.value = 0
+          console.log(res)
+          information.value = res.data
+          productIMG.value = res.data.picture
+          res.data.memberData.forEach(element => {
+            totalqty.value = totalqty.value + element.qty
+            totalprice.value = totalqty.value * res.data.price
+          });
+          window.scrollTo(0, document.body.scrollHeight);
+        })
+        .catch(err=>{
+          console.log(err)
+        })
       })
       .catch(err=>{
         console.log(err)
       })
     }
+    let sendGroupBuy = ()=>{
+      axios.post("http://localhost:9191/Carts/Insert",{
+        "shopId": 10230,
+        "salePageId": 885704,
+        "saleProductSKUid": 1273384,
+        "qty": totalqty.value
+      })
+      .then(res=>{
+        console.log(res)
+        orderNumber.value = res.data
+        orderResultDisplay.value = true
+        window.scrollTo(0, 0);
+      })
+      .catch(err=>{
+        console.log(err)
+      })
+      console.log("HI")
+    }
     onMounted(()=>{
+      if(window.location.href.split('?')[1]!=="salepageid"){
+        // window.location.href = "http://localhost:5173/index.html?salepageid=885704"
+      }else{
+        window.location.href = "http://localhost:5173/index.html?salepageid=885704"
+      }
       let url = window.location.href;
       var queryString = url.split('?')[1];
       console.log(queryString)
@@ -47,10 +94,10 @@ export default{
         params[param[0]] = decodeURIComponent(param[1]);
       }
       // 获取特定参数的值
-      var paramValue = params['product'];
-      console.log(paramValue)
+      paramValue.value = params['salepageid'];
+      console.log(paramValue.value)
       axios.get("http://localhost:9191/api/Order/Detail",{params: {
-        product_name: paramValue // 在這裡設定參數
+        salepageid: paramValue.value // 在這裡設定參數
       }})
       .then(res=>{
         console.log(res)
@@ -60,6 +107,7 @@ export default{
           totalqty.value = totalqty.value + element.qty
           totalprice.value = totalqty.value * res.data.price
         });
+        productIMG.value = "https:"+res.data.picture
       })
       .catch(err=>{
         console.log(err)
@@ -74,8 +122,11 @@ export default{
       productIMG,
       username,
       orderqty,
+      orderResultDisplay,
+      orderNumber,
       clickSureButton,
-      joinGroup
+      joinGroup,
+      sendGroupBuy
     }
   }
 }
@@ -103,7 +154,7 @@ export default{
     <div class="layout-body" v-show="groupshoppingDisplay">
       <div class="layout-body-content">
         <div class="layout-body-content-left">
-          <img src="./img/hamburger.jpg" alt="">
+          <img v-bind:src="productIMG" alt="" style="width: 50%;">
         </div>
         <div class="layout-body-content-right">
           <div>{{ information.product }}</div>
@@ -141,6 +192,14 @@ export default{
         <div>
           共{{ totalqty }}件,{{totalprice}}元
         </div>
+        <div v-on:click="sendGroupBuy">送出團購</div>
+      </div>
+    </div>
+    <div class="order-result" v-show="orderResultDisplay">
+      <div class="order-result-window">
+        <div>{{ orderNumber }}</div>
+        <div>共{{ totalqty }}件,
+        {{ totalprice }}元</div>
       </div>
     </div>
   </div>
@@ -179,6 +238,7 @@ export default{
 }
 .content{
   height: calc(100vh - 100px);
+  position: relative;
 }
 .layout-header-fix{
   background-color: #e72410;
@@ -225,5 +285,21 @@ export default{
 
 td{
   text-align: center;
+}
+
+.order-result{
+  position: absolute;
+  top: 100px;
+  height: calc(200vh - 100px);
+  width: calc(100vw - 17px);
+  display: flex;
+  background-color: #DDD;
+}
+
+.order-result-window{
+  margin: 0 auto;
+  width: 400px;
+  height: 300px;
+  background-color: #fff;
 }
 </style>

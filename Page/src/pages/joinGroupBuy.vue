@@ -1,17 +1,21 @@
 <script>
-import { onMounted } from 'vue';
+import { onMounted, ref } from 'vue';
 import Loading from "../components/Loading.vue"
 import router from '../router/router.js'
+import segmentatesalepageid from "../function/segmentatesalepageid.js"
 
 export default{
     setup() {
+        let username = ref("");
         let joinGroupBuy =()=>{
+            localStorage.setItem("username", username.value)
             router.push({path:"/joinGroupBuy/memberGroupBuy"})
         }
         onMounted(() => {
-            console.log("HI");
+            // console.log(segmentatesalepageid.segmentatesalepageid())
+            localStorage.setItem("salepageid", segmentatesalepageid.segmentatesalepageid())
         });
-        return {joinGroupBuy}
+        return {username, joinGroupBuy}
     },
     components: { Loading }
 }
@@ -35,7 +39,7 @@ export default{
             <div class="createGroupBuy-content-form-title">團購</div>
             <div style="text-align: center;margin-bottom: 20px;"><p>一起團購吧!</p></div>
             <div class="createGroupBuy-content-form-name">
-                <input type="text" class="createGroupBuy-content-form-name-input" placeholder="輸入名稱">
+                <input type="text" class="createGroupBuy-content-form-name-input" placeholder="輸入名稱" v-model="username">
             </div>
             <div class="createGroupBuy-content-form-button">
                 <button class="createGroupBuy-content-form-button-button" v-on:click="joinGroupBuy">加入</button>

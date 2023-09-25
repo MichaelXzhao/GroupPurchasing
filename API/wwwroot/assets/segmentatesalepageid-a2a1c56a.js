@@ -1,0 +1,1 @@
+let s=()=>{for(var l=window.location.href.split("?")[1],a=l.split("&"),r={},e=0;e<a.length;e++){var t=a[e].split("=");r[t[0]]=decodeURIComponent(t[1])}return r.salepageid};const o={segmentatesalepageid:s};export{o as s};

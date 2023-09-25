@@ -1,13 +1,70 @@
 <script>
-import { onMounted } from 'vue';
+import { onMounted, ref } from 'vue';
 import Loading from "../../components/Loading.vue"
-
+import axios from 'axios'
+import changeqty from '../../function/changeqty';
 
 export default{
     setup() {
+        let data = ref("")
+        let memberData = ref()
+        let totalqty = ref(0)
+        let inputqty = ref(0)
+        let imgurl = ref("")
+        let addqty = (qty)=>{
+            inputqty.value = changeqty.addqty(qty)
+        }
+        let reduceqty = (qty)=>{
+            inputqty.value = changeqty.reduceqty(qty)
+        }
+        let joinGroupBuy = ()=>{
+            console.log(inputqty.value)
+            console.log(import.meta.env.VITE_API_URL)
+            axios.post(import.meta.env.VITE_API_URL+"api/Order/add",{
+                "user_name": localStorage.getItem("username"),
+                "product_qty": inputqty.value,
+                "price": data.value.price,
+                "product": data.value.product,
+                "picture": data.value.picture,
+                "salepageid": data.value.salepageid,
+                "shopid": data.value.shopid,
+                "skuid": data.value.skuid
+            })
+            .then(res=>{
+                console.log(res)
+            })
+            .catch(err=>{
+                console.log(err)
+            })
+        }
         onMounted(() => {
-            console.log("HI");
+            console.log(import.meta.env.VITE_API_URL);
+            axios.get(import.meta.env.VITE_API_URL+"api/Order/Detail?salepageid=" + localStorage.getItem("salepageid"))
+            .then(res=>{
+                console.log(res)
+                data.value = res.data
+                console.log(data.value)
+                memberData.value = res.data.memberData
+                memberData.value.forEach(element => {
+                    totalqty.value = totalqty.value + element.qty
+                });
+                console.log(memberData.value)
+                imgurl.value = "https:" + res.data.picture
+            })
+            .catch(err=>{
+                console.log(err)
+            })
         });
+        return {
+            data, 
+            memberData,
+            totalqty,
+            inputqty,
+            imgurl,
+            addqty,
+            reduceqty,
+            joinGroupBuy
+        }
     },
     components: { Loading }
 }
@@ -25,14 +82,14 @@ export default{
             <div class="hostGroupBuy-content-left">
                 <div class="hostGroupBuy-content-left-img">
                     <div class="hostGroupBuy-content-left-img-div">
-                        <img class="hostGroupBuy-content-left-img-img" src="" alt="">
+                        <img class="hostGroupBuy-content-left-img-img" v-bind:src="imgurl" alt="">
                     </div>
                     <div class="hostGroupBuy-content-left-img-small">
                     </div>
                 </div>
             </div>
             <div class="hostGroupBuy-content-right">
-                <div class="hostGroupBuy-content-right-title">【台灣現貨】超有質感Allen 抓一隻來一打 大Ray小Ray落玉盤</div>
+                <div class="hostGroupBuy-content-right-title">{{ data.product }}</div>
                 <div class="hostGroupBuy-content-right-price">$300</div>
                 <div class="hostGroupBuy-content-right-color">
                     <div class="hostGroupBuy-content-right-color-title">顏色</div>
@@ -65,17 +122,17 @@ export default{
                 <div class="hostGroupBuy-content-right-qty">
                     <div class="hostGroupBuy-content-right-color-title">數量</div>
                     <div class="hostGroupBuy-content-right-qty-content">
-                        <button class="hostGroupBuy-content-right-color-content-minus">
+                        <button class="hostGroupBuy-content-right-color-content-minus" v-on:click="reduceqty(inputqty)">
                             <svg style="width: 10px;" enable-background="new 0 0 10 10" viewBox="0 0 10 10" x="0" y="0" class="shopee-svg-icon"><polygon points="4.5 4.5 3.5 4.5 0 4.5 0 5.5 3.5 5.5 4.5 5.5 10 5.5 10 4.5"></polygon></svg>
                         </button>
-                        <input class="hostGroupBuy-content-right-color-content-input" type="number">
-                        <button class="hostGroupBuy-content-right-color-content-plus">
+                        <input class="hostGroupBuy-content-right-color-content-input" type="number" v-model="inputqty">
+                        <button class="hostGroupBuy-content-right-color-content-plus" v-on:click="addqty(inputqty)">
                             <svg style="width: 10px;" enable-background="new 0 0 10 10" viewBox="0 0 10 10" x="0" y="0" class="shopee-svg-icon icon-plus-sign"><polygon points="10 4.5 5.5 4.5 5.5 0 4.5 0 4.5 4.5 0 4.5 0 5.5 4.5 5.5 4.5 10 5.5 10 5.5 5.5 10 5.5"></polygon></svg>
                         </button>
                     </div>
                 </div>
                 <div class="hostGroupBuy-content-right-color-content-groupbuy">
-                    <button class="hostGroupBuy-content-right-color-content-groupbuy-button">
+                    <button class="hostGroupBuy-content-right-color-content-groupbuy-button" v-on:click="joinGroupBuy">
                         加入團購
                     </button>
                 </div>
@@ -90,18 +147,21 @@ export default{
                         <th>名稱</th>
                         <th>數量</th>
                         <th>金額</th>
-                        <th></th>
                     </tr>
                 </thead>
                 <tbody class="hostGroup-list-table-table-tbody">
-                    <tr>
-                        <td>Micheal</td>
-                        <td>10</td>
-                        <td>3000</td>
-                        <td>取消訂單</td>
+                    <tr v-for="memberDataList in memberData">
+                        <td>{{ memberDataList.member }}</td>
+                        <td>{{ memberDataList.qty }}</td>
+                        <td>{{ memberDataList.qty * data.price }}</td>
                     </tr>
                 </tbody>
             </table>
+            <div class="hostGroup-list-total">
+                <div class="hostGroup-list-total-total">
+                    <div class="hostGroup-list-total-content">共10件，3000元</div>
+                </div>
+            </div>
         </div>
     </div>
 </template>

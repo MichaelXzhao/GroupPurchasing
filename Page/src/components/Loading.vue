@@ -58,14 +58,16 @@
 
 
 .animation-shrimp-context{
-    width: 90%;
+    width: 100vw;
     position: relative;
+    display: flex;
 }
 
 .animation-shrimp-context-img{
-    width: 90%;
-    position: absolute;
-    left: 21px;
-    bottom: -140px;
+    width: 162px;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 50px;
+    padding-left: 20px;
 }
 </style>

@@ -44,7 +44,7 @@ export default{
                 </div>
                 <div class="profile-point">
                     <h5 class="profile-point-title">積分</h5>
-                    <h2 class="profile-point-number">50</h2>
+                    <h2 class="profile-point-number">{{ data.points }}</h2>
                 </div>
             </div>
             <div class="profile-recommender">

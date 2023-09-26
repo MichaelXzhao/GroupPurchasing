@@ -21,7 +21,10 @@ namespace API.Controllers
         {
             _dbcontext = dbcontext;
         }
-
+        public class RecommendData 
+        {
+            public string name { get; set; }
+        }
         [HttpGet("Recommendation")]
         public async Task<ActionResult> GetRecommendData(string username)
         {
@@ -41,13 +44,20 @@ namespace API.Controllers
             else
             {
                 var members = existingusername.Select(o => o.member).ToList();
+                var RecommendData = new List<RecommendData>();
+                //var recommendData = List<Order>
+                foreach (var item in members)
+                {
+                    RecommendData recommender = new () { name = item};
+                    RecommendData.Add(recommender);
+                }
                 var totalPoints = existingusername.Sum(o => o.points);
 
                 return Ok(new
                 {
                     username = username,
                     points = totalPoints,
-                    RecommendData = members
+                    RecommendData = RecommendData
                 });
             }
         }

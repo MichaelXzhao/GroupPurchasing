@@ -3,6 +3,7 @@ import { onMounted, ref } from 'vue';
 import Loading from "../components/Loading.vue"
 import router from '../router/router.js'
 import segmentatesalepageid from "../function/segmentatesalepageid.js"
+import segmentaterecommender from "../function/segmentaterecommender.js"
 
 export default{
     setup() {
@@ -14,6 +15,7 @@ export default{
         onMounted(() => {
             // console.log(segmentatesalepageid.segmentatesalepageid())
             localStorage.setItem("salepageid", segmentatesalepageid.segmentatesalepageid())
+            localStorage.setItem("recommender", segmentaterecommender.segmentaterecommender())
         });
         return {username, joinGroupBuy}
     },

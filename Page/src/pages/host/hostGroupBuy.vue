@@ -4,6 +4,7 @@ import Loading from "../../components/Loading.vue"
 import axios from 'axios'
 import changeqty from '../../function/changeqty';
 import router from '../../router/router';
+import shareURL from '../../function/shareURL';
 
 export default{
     setup() {
@@ -61,6 +62,9 @@ export default{
                 window.scrollTo(0, document.body.scrollHeight);
             })
         }
+        let shareWeb = ()=>{
+            shareURL.shareURL(localStorage.getItem("username"))
+        }
         let insertCart = ()=>{
             window.scrollTo(0, 0);
             loadingDisplay.value = true
@@ -115,6 +119,7 @@ export default{
             addqty,
             reduceqty,
             joinGroupBuy,
+            shareWeb,
             insertCart
         }
     },
@@ -144,7 +149,7 @@ export default{
                 <div class="hostGroupBuy-content-right-title">{{ data.product }}</div>
                 <div class="hostGroupBuy-content-right-price">${{ data.price }}</div>
                 <div class="hostGroupBuy-content-right-color">
-                    <div class="hostGroupBuy-content-right-color-title">顏色</div>
+                    <!-- <div class="hostGroupBuy-content-right-color-title">顏色</div> -->
                     <div class="hostGroupBuy-content-right-color-content">
                         <!-- <div class="hostGroupBuy-content-right-color-content-color">
                             <div class="hostGroupBuy-content-right-color-content-color-color">白色</div>
@@ -158,7 +163,7 @@ export default{
                     </div>
                 </div>
                 <div class="hostGroupBuy-content-right-size">
-                    <div class="hostGroupBuy-content-right-color-title">尺寸</div>
+                    <!-- <div class="hostGroupBuy-content-right-color-title">尺寸</div> -->
                     <div class="hostGroupBuy-content-right-color-content">
                         <!-- <div class="hostGroupBuy-content-right-color-content-color">
                             <div class="hostGroupBuy-content-right-color-content-color-color">S</div>
@@ -186,6 +191,9 @@ export default{
                 <div class="hostGroupBuy-content-right-color-content-groupbuy">
                     <button class="hostGroupBuy-content-right-color-content-groupbuy-button" v-on:click="joinGroupBuy">
                         加入團購
+                    </button>
+                    <button class="hostGroupBuy-content-right-color-content-share-button" v-on:click="shareWeb">
+                        分享連結
                     </button>
                 </div>
                 <div>已選購${{ discountData.totalOriginalPrice }}</div>
@@ -215,7 +223,12 @@ export default{
             </table>
             <div class="hostGroup-list-total">
                 <div class="hostGroup-list-total-total">
-                    <div class="hostGroup-list-total-content">共{{ totalqty }}件，{{totalqty * data.price}}元</div>
+                    <div class="hostGroup-list-total-content">
+                        <div style="margin-right: 10px;">已選購${{ discountData.totalOriginalPrice }}</div>
+                        <div style="margin-right: 10px;">目前折扣{{ discountData.promotionDiscount }}</div>
+                        <div style="margin-right: 10px;">{{ discountData.promotionDiscountTitle }}</div>
+                        <div style="margin-right: 10px;">{{ discountData.recommendConditionTitle }}</div>
+                    </div>
                     <div class="hostGroup-list-total-button">
                         <button class="hostGroup-list-total-button-button" v-on:click="insertCart">提交購物車</button>
                     </div>
@@ -386,6 +399,16 @@ input[type="number"]::-webkit-outer-spin-button {
     padding: 8px 12px;
 }
 
+.hostGroupBuy-content-right-color-content-share-button{
+    border: #1049e7 solid 1px;
+    background-color: #1049e765;
+    color: #ffffff;
+    width: 120px;
+    font-size: 16px;
+    padding: 8px 12px;
+    margin-left: 20px;
+}
+
 .hostGroup-list{
     height: 100vh;
     background-color: #ececec;
@@ -457,6 +480,7 @@ table {
     font-size: 24px;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     margin-right: 20px;
+    display: flex;
 }
 
 .hostGroup-list-total-button{

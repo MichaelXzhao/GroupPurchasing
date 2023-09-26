@@ -22,6 +22,10 @@ const routes = [
     {
         path:"/result",
         component:()=>import("../pages/result.vue")
+    },
+    {
+        path:"/profile",
+        component:()=>import("../pages/profile.vue")
     }
 ]
 

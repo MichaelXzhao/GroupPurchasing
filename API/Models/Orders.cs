@@ -22,4 +22,8 @@ public partial class Orders
     public string? shopid { get; set; }
 
     public string? skuid { get; set; }
+
+    public string? recommender { get; set; }
+
+    public int? points { get; set; }
 }

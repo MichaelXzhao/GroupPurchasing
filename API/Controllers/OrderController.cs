@@ -58,36 +58,56 @@ namespace API.Controllers
                 //儲存到DB
                 var newOrders= new Orders{
                     member="host",
-                    qty=1,
+                    qty=0,
                     price=nineyi_price,
                     product=nineyi_title,
                     picture=nineyi_picurl,
                     salepageid=nineyi_salepageid,
                     shopid=nineyi_shopid,
-                    skuid=nineyi_sku
+                    skuid=nineyi_sku,
+                    recommender=null,
+                    points=0
                 };
                 _dbcontext.Orders.Add(newOrders);
-                await _dbcontext.SaveChangesAsync();
-               
+                await _dbcontext.SaveChangesAsync();              
             }
-
-            
+           
             var orders = await _dbcontext.Orders
                 .Where(o => o.salepageid.Equals(salepageid))
                 .ToListAsync(); // 獲取所有符合的訂單
 
             if (orders == null || orders.Count == 0)
             {
-                return NotFound(new { message = "找不到符合條件的訂單" });
+                return BadRequest(new { message = "找不到符合條件的訂單" });
             }
 
-            var memberData = orders.Select(order => new
+            // 用字典合併相同的會員(可能出現在同一成員，在不同推薦人的連結下單)
+            var memberDataDictionary = new Dictionary<string, int>();
+            foreach (var order in orders)
             {
-                member = order.member,
-                qty = order.qty,
-            }).ToList(); 
+                // 排除掉資料庫中 member=host 的資料
+                if (order.member == "host")
+                {
+                    continue;
+                }
+                
+                if(memberDataDictionary.ContainsKey(order.member))
+                {
+                    // 如果已經存在相同的會員，則qty相加
+                    memberDataDictionary[order.member] += order.qty ??0;
+                }
+                else
+                {
+                    // 沒有的話就獨立一筆
+                    memberDataDictionary[order.member] = order.qty ??0;
+                }                   
+            }
 
-            Console.WriteLine("order:"+orders[0]);
+            var memberData = memberDataDictionary.Select(kv => new
+            {
+                member = kv.Key,
+                qty = kv.Value,
+            }).ToList();
 
             // 加總所有的商品數
             var totalQty = memberData.Sum(member => member.qty);
@@ -141,10 +161,11 @@ namespace API.Controllers
             try{
                 //如果下訂者已在同一個商品下過單，則直接在同一成員的數量做變更
                 var existingmember = await _dbcontext.Orders
-                    .FirstOrDefaultAsync(o => o.member == input.user_name && o.product == input.product);
+                    .FirstOrDefaultAsync(o => o.member == input.user_name && o.product == input.product && o.recommender== input.recommender);
                 if(existingmember!=null)
                 {
                     existingmember.qty+=input.product_qty;
+                    existingmember.points +=1 ;
                 }
                 else
                 {
@@ -157,7 +178,9 @@ namespace API.Controllers
                         picture=input.picture,
                         salepageid=input.salepageid,
                         shopid=input.shopid,
-                        skuid=input.skuid,                       
+                        skuid=input.skuid, 
+                        recommender=input.recommender,
+                        points =1                   
                     };
                     _dbcontext.Orders.Add(newOrders);
                 }     
@@ -172,13 +195,29 @@ namespace API.Controllers
 
                 if (orders == null || orders.Count == 0)
                 {
-                    return NotFound(); 
+                    return BadRequest(); 
                 }
 
-                var memberData = orders.Select(order => new
+                // 用字典合併相同的會員(可能出現在同一成員，在不同推薦人的連結下單)
+                var memberDataDictionary = new Dictionary<string, int>();
+                foreach (var order in orders)
                 {
-                    member = order.member,
-                    qty = order.qty,
+                    if(memberDataDictionary.ContainsKey(order.member))
+                    {
+                        // 如果已經存在相同的會員，則qty相加
+                        memberDataDictionary[order.member] += order.qty ??0;
+                    }
+                    else
+                    {
+                        // 沒有的話就獨立一筆
+                        memberDataDictionary[order.member] = order.qty ??0;
+                    }                   
+                }
+
+                var memberData = memberDataDictionary.Select(kv => new
+                {
+                    member = kv.Key,
+                    qty = kv.Value,
                 }).ToList(); 
 
                 // 加總所有的商品數

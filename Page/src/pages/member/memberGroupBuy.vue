@@ -6,21 +6,23 @@ import changeqty from '../../function/changeqty';
 
 export default{
     setup() {
-        let data = ref("")
+        let data = ref({})
         let memberData = ref()
         let totalqty = ref(0)
         let inputqty = ref(0)
         let imgurl = ref("")
+        let discountData = ref({})
+        let loadingDisplay = ref(false)
         let addqty = (qty)=>{
             inputqty.value = changeqty.addqty(qty)
         }
         let reduceqty = (qty)=>{
             inputqty.value = changeqty.reduceqty(qty)
         }
-        let joinGroupBuy = ()=>{
+        let joinGroupBuy = async ()=>{
             console.log(inputqty.value)
             console.log(import.meta.env.VITE_API_URL)
-            axios.post(import.meta.env.VITE_API_URL+"api/Order/add",{
+            await axios.post(import.meta.env.VITE_API_URL+"api/Order/add",{
                 "user_name": localStorage.getItem("username"),
                 "product_qty": inputqty.value,
                 "price": data.value.price,
@@ -36,8 +38,28 @@ export default{
             .catch(err=>{
                 console.log(err)
             })
+
+            await axios.get(import.meta.env.VITE_API_URL+"api/Order/Detail?salepageid=" + localStorage.getItem("salepageid"))
+            .then(res=>{
+                console.log(res)
+                data.value = res.data
+                console.log(data.value)
+                memberData.value = res.data.memberData
+                totalqty.value = 0;
+                memberData.value.forEach(element => {
+                    totalqty.value = totalqty.value + element.qty
+                });
+                discountData.value = res.data.discountData
+            })
+            .catch(err=>{
+                console.log(err)
+            })
+            .finally(()=>{
+                window.scrollTo(0, document.body.scrollHeight);
+            })
         }
         onMounted(() => {
+            loadingDisplay.value = true
             console.log(import.meta.env.VITE_API_URL);
             axios.get(import.meta.env.VITE_API_URL+"api/Order/Detail?salepageid=" + localStorage.getItem("salepageid"))
             .then(res=>{
@@ -45,14 +67,19 @@ export default{
                 data.value = res.data
                 console.log(data.value)
                 memberData.value = res.data.memberData
+                totalqty.value = 0;
                 memberData.value.forEach(element => {
                     totalqty.value = totalqty.value + element.qty
                 });
                 console.log(memberData.value)
                 imgurl.value = "https:" + res.data.picture
+                discountData.value = res.data.discountData
             })
             .catch(err=>{
                 console.log(err)
+            })
+            .finally(()=>{
+                loadingDisplay.value = false
             })
         });
         return {
@@ -61,6 +88,8 @@ export default{
             totalqty,
             inputqty,
             imgurl,
+            discountData,
+            loadingDisplay,
             addqty,
             reduceqty,
             joinGroupBuy
@@ -90,11 +119,11 @@ export default{
             </div>
             <div class="hostGroupBuy-content-right">
                 <div class="hostGroupBuy-content-right-title">{{ data.product }}</div>
-                <div class="hostGroupBuy-content-right-price">$300</div>
+                <div class="hostGroupBuy-content-right-price">${{ data.price }}</div>
                 <div class="hostGroupBuy-content-right-color">
                     <div class="hostGroupBuy-content-right-color-title">顏色</div>
                     <div class="hostGroupBuy-content-right-color-content">
-                        <div class="hostGroupBuy-content-right-color-content-color">
+                        <!-- <div class="hostGroupBuy-content-right-color-content-color">
                             <div class="hostGroupBuy-content-right-color-content-color-color">白色</div>
                         </div>
                         <div class="hostGroupBuy-content-right-color-content-color">
@@ -102,13 +131,13 @@ export default{
                         </div>
                         <div class="hostGroupBuy-content-right-color-content-color">
                             <div class="hostGroupBuy-content-right-color-content-color-color">灰色</div>
-                        </div>
+                        </div> -->
                     </div>
                 </div>
                 <div class="hostGroupBuy-content-right-size">
                     <div class="hostGroupBuy-content-right-color-title">尺寸</div>
                     <div class="hostGroupBuy-content-right-color-content">
-                        <div class="hostGroupBuy-content-right-color-content-color">
+                        <!-- <div class="hostGroupBuy-content-right-color-content-color">
                             <div class="hostGroupBuy-content-right-color-content-color-color">S</div>
                         </div>
                         <div class="hostGroupBuy-content-right-color-content-color">
@@ -116,7 +145,7 @@ export default{
                         </div>
                         <div class="hostGroupBuy-content-right-color-content-color">
                             <div class="hostGroupBuy-content-right-color-content-color-color">L</div>
-                        </div>
+                        </div> -->
                     </div>
                 </div>
                 <div class="hostGroupBuy-content-right-qty">
@@ -136,6 +165,10 @@ export default{
                         加入團購
                     </button>
                 </div>
+                <div>已選購${{ discountData.totalOriginalPrice }}</div>
+                <div>目前折扣{{ discountData.promotionDiscount }}</div>
+                <div>{{ discountData.promotionDiscountTitle }}</div>
+                <div>{{ discountData.recommendConditionTitle }}</div>
             </div>
         </div>
     </div>
@@ -159,10 +192,13 @@ export default{
             </table>
             <div class="hostGroup-list-total">
                 <div class="hostGroup-list-total-total">
-                    <div class="hostGroup-list-total-content">共10件，3000元</div>
+                    <div class="hostGroup-list-total-content">共{{ totalqty }}件，{{totalqty * data.price}}元</div>
                 </div>
             </div>
         </div>
+    </div>
+    <div class="loading" v-show="loadingDisplay">
+        <Loading></Loading>
     </div>
 </template>
 
@@ -408,5 +444,13 @@ table {
     font-size: 16px;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     font-weight: 900;
+}
+
+.loading{
+    height: calc(200vh - 100px);
+    width: 100vw;
+    top: 100px;
+    position: absolute;
+    background-color: #ffffff;
 }
 </style>

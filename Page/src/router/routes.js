@@ -18,6 +18,10 @@ const routes = [
     {
         path:"/joinGroupBuy/memberGroupBuy",
         component:()=>import("../pages/member/memberGroupBuy.vue")
+    },
+    {
+        path:"/result",
+        component:()=>import("../pages/result.vue")
     }
 ]
 

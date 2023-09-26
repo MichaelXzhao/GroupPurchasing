@@ -235,8 +235,8 @@ export default{
                     <div class="hostGroup-list-total-content" style="display: flex;">
                         <div style="margin-right: 10px;font-size: 16px;align-items: end;display: flex;">已選購${{ discountData.totalOriginalPrice }}</div>
                         <div style="margin-right: 10px;font-size: 16px;align-items: end;display: flex;">目前折扣{{ discountData.promotionDiscount }}</div>
-                        <div style="margin-right: 10px;font-size: 16px;align-items: end;display: flex;">{{ discountData.promotionDiscountTitle }}</div>
-                        <div style="margin-right: 10px;color: #70c1d6;align-items: end;display: flex;">{{ discountData.recommendConditionTitle }}</div>
+                        <div style="margin-right: 10px;font-size: 16px;align-items: end;display: flex;">{{ discountData.recommendConditionTitle }}</div>
+                        <div style="margin-right: 10px;color: #70c1d6;align-items: end;display: flex;">{{ discountData.promotionDiscountTitle }}</div>
                     </div>
                     <div class="hostGroup-list-total-button">
                         <button class="hostGroup-list-total-button-button" v-on:click="insertCart">提交購物車</button>

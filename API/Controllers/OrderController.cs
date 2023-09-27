@@ -67,7 +67,7 @@ namespace API.Controllers
                 HttpRequestMessage request = new HttpRequestMessage()
                 {
                     Method = HttpMethod.Get,
-                    RequestUri = new Uri($"https://10230.shop.qa.91dev.tw/webapi/SalePageV2/GetSalePageV2Info/10230/{salepageid}/1"),
+                    RequestUri = new Uri($"https://10230.shop.qa.91dev.tw/webapi/SalePageV2/GetSalePageV2Info/10230/{salepageid}"),
                 };
                 string requestBody = "{\r\n    \"source\": \"Web\"\r\n}"; // 替換為request正文
                 request.Content = new StringContent(requestBody, Encoding.UTF8, "application/json");
@@ -100,7 +100,8 @@ namespace API.Controllers
                     shopid=nineyi_shopid,
                     skuid=nineyi_sku,
                     recommender=null,
-                    points=0
+                    points=0,
+                    status="unpaid"
                 };
                 _dbcontext.Orders.Add(newOrders);
                 await _dbcontext.SaveChangesAsync();              
@@ -109,6 +110,7 @@ namespace API.Controllers
             var orders = await _dbcontext.Orders
                 .Where(o => o.salepageid.Equals(salepageid))
                 .ToListAsync(); // 獲取所有符合的訂單
+            Console.WriteLine("orders:"+orders);
 
             if (orders == null || orders.Count == 0)
             {
@@ -120,7 +122,7 @@ namespace API.Controllers
             foreach (var order in orders)
             {
                 // 排除掉資料庫中 member=host 的資料
-                if (order.member == "host")
+                if (order.member == "host" || order.status == "paid")
                 {
                     continue;
                 }
@@ -142,13 +144,15 @@ namespace API.Controllers
                 member = kv.Key,
                 qty = kv.Value,
             }).ToList();
+            Console.WriteLine("memberDataGET:"+memberData);
 
             // 加總所有的商品數
             var totalQty = memberData.Sum(member => member.qty);
             string totalQtyString = totalQty.ToString();
             var discountData=(object)null;
 
-            if(totalQty!=0)
+            // 如果資料庫的商品數不為0，且團友狀態為unpaid
+            if(totalQty!=0 && orders.All(order => order.status == "unpaid"))
             {
                 // (2)[POST] cart/create
                 HttpClient clientCreate = new HttpClient();
@@ -178,7 +182,6 @@ namespace API.Controllers
                 string TotalDiscount = jsonResponseCreate["data"]["salepageGroupList"][0]["salepageList"][0]["totalDiscount"].ToString();
                 string TotalPayment = jsonResponseCreate["data"]["salepageGroupList"][0]["salepageList"][0]["totalPayment"].ToString();
                 string TotalPrice = jsonResponseCreate["data"]["salepageGroupList"][0]["salepageList"][0]["totalPrice"].ToString();
-                //Console.WriteLine("cartUniqueKey Value: " + cartUniqueKeyValue);
 
                 //回傳所有折扣API相關資料
                 discountData = new
@@ -211,11 +214,11 @@ namespace API.Controllers
             try{
                 //如果下訂者已在同一個商品下過單，則直接在同一成員的數量做變更
                 var existingmember = await _dbcontext.Orders
-                    .FirstOrDefaultAsync(o => o.member == input.user_name && o.product == input.product && o.recommender== input.recommender);
-                if(existingmember!=null)
+                    .FirstOrDefaultAsync(o => o.member == input.user_name && o.product == input.product && o.recommender== input.recommender && o.status=="unpaid");
+                if(existingmember!=null )
                 {
                     existingmember.qty+=input.product_qty;
-                    existingmember.points +=1 ;
+                    //existingmember.points +=1 ; //如果每團友每加購一筆，團長就多一點積分
                 }
                 else
                 {
@@ -230,7 +233,8 @@ namespace API.Controllers
                         shopid=input.shopid,
                         skuid=input.skuid, 
                         recommender=input.recommender,
-                        points =1                   
+                        points =1,
+                        status="unpaid"                   
                     };
                     _dbcontext.Orders.Add(newOrders);
                 }     
@@ -252,6 +256,11 @@ namespace API.Controllers
                 var memberDataDictionary = new Dictionary<string, int>();
                 foreach (var order in orders)
                 {
+                    // 排除掉資料庫中 member=host 的資料
+                    if (order.member == "host" || order.status == "paid")
+                    {
+                        continue;
+                    }
                     if(memberDataDictionary.ContainsKey(order.member))
                     {
                         // 如果已經存在相同的會員，則qty相加
@@ -269,7 +278,7 @@ namespace API.Controllers
                     member = kv.Key,
                     qty = kv.Value,
                 }).ToList(); 
-
+                Console.WriteLine("memberDataPOST:"+memberData);
                 
 
                 // (1) [POST] cart/insert API

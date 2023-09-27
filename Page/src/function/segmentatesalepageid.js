@@ -13,6 +13,7 @@ let segmentatesalepageid = ()=>{
     }
     // 获取特定参数的值
     let paramValue = params['salepageid'];
+    // console.log(typeof paramValue)
 
     return paramValue;
 }

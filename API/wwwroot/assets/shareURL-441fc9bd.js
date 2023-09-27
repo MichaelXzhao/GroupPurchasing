@@ -1,1 +1,0 @@
-let a=e=>(e=e+1,e),r=e=>(e=e-1,e);const l={addqty:a,reduceqty:r};let o=async()=>{let e=`http://localhost:9191/joinGroupBuy?salepageid=${localStorage.getItem("salepageid")}&recommender=${localStorage.getItem("username")}`;try{await navigator.clipboard.writeText(e),alert("URL 已複製到剪貼簿!")}catch(t){alert("複製失敗:",t)}};const c={shareURL:o};export{l as c,c as s};

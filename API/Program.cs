@@ -4,13 +4,15 @@ using API.Services.Order;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddSignalR();
+
 //CORS setting
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("MyAllowedOrigins",
         policy =>
         {
-            policy.WithOrigins("*") // note the port is included 
+            policy.AllowAnyOrigin() // note the port is included 
                 .AllowAnyHeader()
                 .AllowAnyMethod();
         });

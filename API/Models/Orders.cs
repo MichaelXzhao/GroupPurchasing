@@ -26,4 +26,6 @@ public partial class Orders
     public string? recommender { get; set; }
 
     public int? points { get; set; }
+
+    public string? status { get; set; }
 }

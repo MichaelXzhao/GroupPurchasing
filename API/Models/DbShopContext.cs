@@ -26,6 +26,7 @@ public partial class GoShopContext : DbContext
             entity.Property(e => e.salepageid).HasMaxLength(255);
             entity.Property(e => e.shopid).HasMaxLength(255);
             entity.Property(e => e.skuid).HasMaxLength(255);
+            entity.Property(e => e.status).HasMaxLength(255);
         });
 
         OnModelCreatingPartial(modelBuilder);

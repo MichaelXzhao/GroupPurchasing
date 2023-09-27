@@ -22,13 +22,47 @@ namespace API.Controllers
             _dbcontext = dbcontext;
         }
 
+        // 獲取"cartUniqueKey"對應值的方法
+        static string GetCartUniqueKeyValue(JToken token)
+        {
+            JObject obj = JObject.Parse(token.ToString());
+            //Console.WriteLine(obj.ToString());
+          
+            JToken cartUniqueKeyToken = token["data"]["cartUniqueKey"];
+            if (cartUniqueKeyToken != null)
+            {
+                //Console.WriteLine(cartUniqueKeyToken);
+                return cartUniqueKeyToken.ToString();
+            }
+
+            return null; // 如果沒找到"cartUniqueKey"，回傳null
+        }
+
+        // 獲取"uniqueKey"對應值的方法
+        static string GetUniqueKeyValue(JToken token)
+        {
+            JObject obj = JObject.Parse(token.ToString());
+            //Console.WriteLine(obj.ToString());
+          
+            JToken UniqueKeyToken = token["data"]["uniqueKey"];
+            if (UniqueKeyToken != null)
+            {
+                //Console.WriteLine(UniqueKeyToken);
+                return UniqueKeyToken.ToString();
+            }
+
+            return null; // 如果沒找到"UniqueKeyToken"，回傳null
+        }
+
+        string cookie = "gaClientId=78749efe-cdd4-4b44-9c28-6ff421d016af; uAUTH=8qkUhcWXMIjVVrT+RAMOHGKUMJxUCpvi8czmdDEGgCdOVwZ3YmMZ6AMeo9g9F6e1VrlhWDfbsDqJzdJJK4dWfHlgeGMR+FDxoiPPtDFjqAg=; uAUTH_samesite=8qkUhcWXMIjVVrT+RAMOHGKUMJxUCpvi8czmdDEGgCdOVwZ3YmMZ6AMeo9g9F6e1VrlhWDfbsDqJzdJJK4dWfHlgeGMR+FDxoiPPtDFjqAg=; __lt__cid=e556f3ba-9714-4800-8871-b6dd760e306e; currency=TWD; GUID=2f161e2e-a76f-4d3f-aa66-a70a98ee9027; _fbp=fb.1.1695204836875.1699548327; ai_user=xAmJC|2023-09-20T10:15:23.828Z; auth=od+XMJjXjeNCLaky+2jWL6ydbCxapZDcTG1yEZHNKtqOe/roW9An/SQ316lhHcLEFF1rS11i40OiI2O3g5NVnjlNRrNWqlA3x/s8oFk3Ihf1QBG5gzGTeUyq+H/1O4FSEGJRRfr/65pgRKjIDUt7KAmckXRz4I9vVv5vliljLBsl1WdIHR4ibUh539lSR9YPXi2MiQOzQz3nH6PkFuV6lfJQmKQOwOpVYx/UzPILZFfMdlKp/Nf4d/iGMDm4oUQRagHLH25qM4kk7PShaHs8C7f5QEfbpgJdR3khZ8Hag+stXHb61DAxMtF8wq9uh3lrB/KmZ1Xic3tFqbrlGrf80GwNfOrJuwU2X7ms/b25yqCkKlv2xlehktUBmhwN6hZWkGwr0zMSN4wG+W90DEymTh4CoiQFrNfaVLov4rXoKFmY7jov1wUUCyWlj6V4+FRf0/nU507NRklGnW6ixO5r1mu77igPFQdvPNxlIIhIOyRZAkODcD+XRSy1aBHlAImpLS47q6n6KpYp8Iu/mhabj8nhRJXKxU/zkNBGB+wuznmAlCPRkD2pnCjgvVfHwZ/BDhPGTyZfNcJocg9iiGpMNPiwMJRZshV4OyfjCb8tXospN80qQbfULGabGeGs8D/E7OphfB8CfYGFC3nHLsfv1rPFZE37pvsL44fKlLtemminsXdwnpQYALgMeU2ByLRGPd82+WcKCnYKUnohoduxJbDL2ZKPhZuNkI0Y45Jd+2CfNPo8YIhqdBKsU3k0KSYXpR588W6A4V6+F6H/KJoZcSt/q/zndigR8PN+ZWZkNMs=; auth_samesite=od+XMJjXjeNCLaky+2jWL6ydbCxapZDcTG1yEZHNKtqOe/roW9An/SQ316lhHcLEFF1rS11i40OiI2O3g5NVnjlNRrNWqlA3x/s8oFk3Ihf1QBG5gzGTeUyq+H/1O4FSEGJRRfr/65pgRKjIDUt7KAmckXRz4I9vVv5vliljLBsl1WdIHR4ibUh539lSR9YPXi2MiQOzQz3nH6PkFuV6lfJQmKQOwOpVYx/UzPILZFfMdlKp/Nf4d/iGMDm4oUQRagHLH25qM4kk7PShaHs8C7f5QEfbpgJdR3khZ8Hag+stXHb61DAxMtF8wq9uh3lrB/KmZ1Xic3tFqbrlGrf80GwNfOrJuwU2X7ms/b25yqCkKlv2xlehktUBmhwN6hZWkGwr0zMSN4wG+W90DEymTh4CoiQFrNfaVLov4rXoKFmY7jov1wUUCyWlj6V4+FRf0/nU507NRklGnW6ixO5r1mu77igPFQdvPNxlIIhIOyRZAkODcD+XRSy1aBHlAImpLS47q6n6KpYp8Iu/mhabj8nhRJXKxU/zkNBGB+wuznmAlCPRkD2pnCjgvVfHwZ/BDhPGTyZfNcJocg9iiGpMNPiwMJRZshV4OyfjCb8tXospN80qQbfULGabGeGs8D/E7OphfB8CfYGFC3nHLsfv1rPFZE37pvsL44fKlLtemminsXdwnpQYALgMeU2ByLRGPd82+WcKCnYKUnohoduxJbDL2ZKPhZuNkI0Y45Jd+2CfNPo8YIhqdBKsU3k0KSYXpR588W6A4V6+F6H/KJoZcSt/q/zndigR8PN+ZWZkNMs=; MID=5600747285; isPromotion21194AlreadyPrompt=true; allowGetPrivacyInfo=true; _ga=GA1.1.78749efe-cdd4-4b44-9c28-6ff421d016af; _ga=GA1.2.78749efe-cdd4-4b44-9c28-6ff421d016af; fr=; fr2=; salePageViewList=888345,885704,884643,888399; isPromotion21302AlreadyPrompt=true; 91_FPID_v3_4_1=34cade3b34f722e5b9e6e12c1c118917; _clck=di1mzx|2|ffd|0|1358; __lt__sid=05cc1235-baef0f4b; isPromotion20938AlreadyPrompt=true; isPromotion21316AlreadyPrompt=true; ai_session=jhD6w|1695778144946|1695779542422.6; _clsk=3zmjc3|1695779542648|21|1|s.clarity.ms/collect";
+
         [HttpGet("Detail")]
         public async Task<ActionResult> GetCartDetail(string salepageid)
         {
             var existingsalepageid = await _dbcontext.Orders
                     .FirstOrDefaultAsync(o => o.salepageid.Equals(salepageid));
             if(existingsalepageid==null){
-                // (1)product/detail
+                // (1) [GET] product/detail
                 HttpClient client = new HttpClient();
                 HttpRequestMessage request = new HttpRequestMessage()
                 {
@@ -112,52 +146,68 @@ namespace API.Controllers
             // 加總所有的商品數
             var totalQty = memberData.Sum(member => member.qty);
             string totalQtyString = totalQty.ToString();
+            var discountData=(object)null;
 
-            // (2) [POST] Calculate 根據每次加總件數，再去打折扣API
-                HttpClient Calculateclient = new HttpClient();
-                HttpRequestMessage Calculaterequest = new HttpRequestMessage()
+            if(totalQty!=0)
+            {
+                // (2)[POST] cart/create
+                HttpClient clientCreate = new HttpClient();
+                HttpRequestMessage requestCreate = new HttpRequestMessage()
                 {
                     Method = HttpMethod.Post,
-                    RequestUri = new Uri("https://10230.shop.qa.91dev.tw/webapi//PromotionEngine/Calculate"),
+                    RequestUri = new Uri("https://10230.shop.qa.91dev.tw/shopping/api/carts/create"),
+                    Headers =
+                    {
+                        { "N1-SHOP-ID", "10230" },
+                        { "Cookie", cookie },
+                        { "N1-HOST", "10230.shop.qa.91dev.tw" },
+                    },
                 };
+                string requestBodyCreate = "{\r\n    \"source\": \"Web\"\r\n}"; // 替換為request正文
+                requestCreate.Content = new StringContent(requestBodyCreate, Encoding.UTF8, "application/json");
+                // 發送request並等待
+                HttpResponseMessage responseCreate = await clientCreate.SendAsync(requestCreate);
 
-                // payload格式要注意，反斜線也要顯示
-                string CalculaterequestBody = "{\"promotionDetailDiscount\":\"{\\\"ShopId\\\":10230,\\\"PromotionId\\\":\\\"21302\\\",\\\"SalePageList\\\":[{\\\"Price\\\":"+orders[0].price.ToString() +",\\\"Qty\\\":"+ totalQtyString +",\\\"SalePageId\\\":"+ orders[0].salepageid +",\\\"SaleProductSKUId\\\":"+ orders[0].skuid +",\\\"TagIds\\\":[\\\"20769\\\",\\\"22311\\\"]}]}\",\"source\":\"Web\"}";
-                Calculaterequest.Content = new StringContent(CalculaterequestBody, Encoding.UTF8, "application/json");
-                HttpResponseMessage Calculateresponse = await Calculateclient.SendAsync(Calculaterequest);
-                string CalculateresponseContent = await Calculateresponse.Content.ReadAsStringAsync();
-                JObject CalculatejsonResponse = JObject.Parse(CalculateresponseContent);
-                //Console.WriteLine("Response JSON: {0}", jsonResponse);
+                // 讀取回傳response
+                string responseContentCreate = await responseCreate.Content.ReadAsStringAsync();
 
-                string TotalQty = CalculatejsonResponse["Data"]["TotalQty"].ToString();
-                string TotalPrice = CalculatejsonResponse["Data"]["TotalPrice"].ToString();
-                string TotalOriginalPrice = CalculatejsonResponse["Data"]["TotalOriginalPrice"].ToString();
-                string PromotionDiscount = CalculatejsonResponse["Data"]["PromotionDiscount"].ToString();
-                string PromotionConditionTitle = CalculatejsonResponse["Data"]["PromotionConditionTitle"].ToString();
-                string PromotionDiscountTitle = CalculatejsonResponse["Data"]["PromotionDiscountTitle"].ToString();
-                string RecommendConditionTitle = CalculatejsonResponse["Data"]["RecommendConditionTitle"].ToString();          
+                // 解析JSON response 為 JObject
+                JObject jsonResponseCreate = JObject.Parse(responseContentCreate);
+
+                // 取得其他折扣、原價金額
+                string TotalDiscount = jsonResponseCreate["data"]["salepageGroupList"][0]["salepageList"][0]["totalDiscount"].ToString();
+                string TotalPayment = jsonResponseCreate["data"]["salepageGroupList"][0]["salepageList"][0]["totalPayment"].ToString();
+                string TotalPrice = jsonResponseCreate["data"]["salepageGroupList"][0]["salepageList"][0]["totalPrice"].ToString();
+                //Console.WriteLine("cartUniqueKey Value: " + cartUniqueKeyValue);
 
                 //回傳所有折扣API相關資料
-                var discountData = new
+                discountData = new
                 {
-                    TotalQty,
-                    TotalPrice,
-                    TotalOriginalPrice,
-                    PromotionDiscount,
-                    PromotionConditionTitle,
-                    PromotionDiscountTitle,
-                    RecommendConditionTitle
+                    totalQtyString,                   
+                    TotalDiscount,
+                    TotalPayment,                   
+                    TotalPrice
                 };
-
-
-            return Ok(new { product = orders[0].product, price = orders[0].price, picture=orders[0].picture, salepageid =orders[0].salepageid, shopid=orders[0].shopid, skuid=orders[0].skuid, memberData, discountData }); 
+            }
+            else
+            {
+                discountData = new
+                {
+                    totalQtyString=0,                 
+                    TotalDiscount=0,
+                    TotalPayment=0,                   
+                    TotalPrice=0
+                };
+            }
+           
+           return Ok(new { product = orders[0].product, price = orders[0].price, picture=orders[0].picture, salepageid =orders[0].salepageid, shopid=orders[0].shopid, skuid=orders[0].skuid, memberData, discountData}); 
         }
-
 
 
         [HttpPost("add")]
         public async Task<ActionResult> addorder([FromBody]AddOrderDto input)
         {
+            
             try{
                 //如果下訂者已在同一個商品下過單，則直接在同一成員的數量做變更
                 var existingmember = await _dbcontext.Orders
@@ -220,49 +270,92 @@ namespace API.Controllers
                     qty = kv.Value,
                 }).ToList(); 
 
+                
+
+                // (1) [POST] cart/insert API
+                HttpClient clientInsert = new HttpClient();
+                HttpRequestMessage requestInsert = new HttpRequestMessage()
+                {
+                    Method = HttpMethod.Post,
+                    RequestUri = new Uri("https://10230.shop.qa.91dev.tw/webapi/ShoppingCartV4/InsertItem"),
+                    Headers =
+                    {
+                        { "N1-SHOP-ID", "10230" },
+                        { "Cookie", cookie },
+                        { "N1-HOST", "10230.shop.qa.91d/ev.tw" },
+                    },
+                };
+
+                // 請根據API的要求，修改以下requestBody
+                string InsertRequestBody = @"
+                {
+                    ""shopId"": " + input.shopid + @",
+                    ""salePageId"": " + input.salepageid + @",
+                    ""saleProductSKUid"": " + input.skuid + @",
+                    ""qty"": " + input.product_qty + @",
+                    ""optionalTypeDef"": """",
+                    ""optionalTypeId"": 0,
+                    ""IsSkuQtyAccumulate"": true,
+                    ""optionalInfo"": null
+                }";
+
+
+                requestInsert.Content = new StringContent(InsertRequestBody, Encoding.UTF8, "application/json");
+
+                // 發送request並等待
+                HttpResponseMessage responseInsert = await clientInsert.SendAsync(requestInsert);
+
+                // 讀取回傳response
+                string responseInsertContent = await responseInsert.Content.ReadAsStringAsync();
+
+                // 解析JSON response 為 JObject，根據需要處理回應
+                JObject InsertJsonResponse = JObject.Parse(responseInsertContent);
+
+                Console.WriteLine(responseInsertContent);
+
                 // 加總所有的商品數
                 var totalQty = memberData.Sum(member => member.qty);
                 string totalQtyString = totalQty.ToString();
-                //Console.WriteLine("total:"+totalQty);
 
-
-                // [POST] Calculate 根據每次加總件數，再去打折扣API
+                // (2)[POST] cart/create
                 HttpClient client = new HttpClient();
                 HttpRequestMessage request = new HttpRequestMessage()
                 {
                     Method = HttpMethod.Post,
-                    RequestUri = new Uri("https://10230.shop.qa.91dev.tw/webapi//PromotionEngine/Calculate"),
+                    RequestUri = new Uri("https://10230.shop.qa.91dev.tw/shopping/api/carts/create"),
+                    Headers =
+                    {
+                        { "N1-SHOP-ID", "10230" },
+                        { "Cookie", cookie },
+                        { "N1-HOST", "10230.shop.qa.91dev.tw" },
+                    },
                 };
-
-                // payload格式要注意，反斜線也要顯示
-                string requestBody = "{\"promotionDetailDiscount\":\"{\\\"ShopId\\\":10230,\\\"PromotionId\\\":\\\"21302\\\",\\\"SalePageList\\\":[{\\\"Price\\\":"+input.price.ToString() +",\\\"Qty\\\":"+ totalQtyString +",\\\"SalePageId\\\":"+ input.salepageid +",\\\"SaleProductSKUId\\\":"+ input.skuid +",\\\"TagIds\\\":[\\\"20769\\\",\\\"22311\\\"]}]}\",\"source\":\"Web\"}";
+                string requestBody = "{\r\n    \"source\": \"Web\"\r\n}"; // 替換為request正文
                 request.Content = new StringContent(requestBody, Encoding.UTF8, "application/json");
+                // 發送request並等待
                 HttpResponseMessage response = await client.SendAsync(request);
-                string responseContent = await response.Content.ReadAsStringAsync();
-                JObject jsonResponse = JObject.Parse(responseContent);
-                //Console.WriteLine("Response JSON: {0}", jsonResponse);
 
-                string TotalQty = jsonResponse["Data"]["TotalQty"].ToString();
-                string TotalPrice = jsonResponse["Data"]["TotalPrice"].ToString();
-                string TotalOriginalPrice = jsonResponse["Data"]["TotalOriginalPrice"].ToString();
-                string PromotionDiscount = jsonResponse["Data"]["PromotionDiscount"].ToString();
-                string PromotionConditionTitle = jsonResponse["Data"]["PromotionConditionTitle"].ToString();
-                string PromotionDiscountTitle = jsonResponse["Data"]["PromotionDiscountTitle"].ToString();
-                string RecommendConditionTitle = jsonResponse["Data"]["RecommendConditionTitle"].ToString();          
+                // 讀取回傳response
+                string responseContent = await response.Content.ReadAsStringAsync();
+
+                // 解析JSON response 為 JObject
+                JObject jsonResponse = JObject.Parse(responseContent);
+
+                // 取得其他折扣、原價金額
+                string TotalDiscount = jsonResponse["data"]["salepageGroupList"][0]["salepageList"][0]["totalDiscount"].ToString();
+                string TotalPayment = jsonResponse["data"]["salepageGroupList"][0]["salepageList"][0]["totalPayment"].ToString();
+                string TotalPrice = jsonResponse["data"]["salepageGroupList"][0]["salepageList"][0]["totalPrice"].ToString();
 
                 //回傳所有折扣API相關資料
                 var discountData = new
                 {
-                    TotalQty,
+                    totalQtyString,                   
+                    TotalDiscount,
+                    TotalPayment,                   
                     TotalPrice,
-                    TotalOriginalPrice,
-                    PromotionDiscount,
-                    PromotionConditionTitle,
-                    PromotionDiscountTitle,
-                    RecommendConditionTitle
                 };
 
-                return Ok(new { product = orders[0].product, price = orders[0].price, picture=orders[0].picture, memberData, discountData });
+                return Ok(new { product = orders[0].product, price = orders[0].price, picture=orders[0].picture, memberData, discountData});
             }
             catch (Exception ex)
             {

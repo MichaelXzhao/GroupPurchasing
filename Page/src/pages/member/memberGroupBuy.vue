@@ -199,7 +199,7 @@ export default{
                 </div>
                 <div>已選購${{ discountData.totalPrice }}</div>
                 <div>目前折扣{{ discountData.totalDiscount }}</div>
-                <div>優惠價{{ discountData.totalPayment }}</div>
+                <div style="font-size: 16px ;color: #70c1d6;">優惠價${{ discountData.totalPayment }}</div>
             </div>
         </div>
     </div>
@@ -226,7 +226,7 @@ export default{
                     <div class="hostGroup-list-total-content" style="display: flex;">
                         <div style="margin-right: 10px;font-size: 16px;align-items: end;display: flex;">已選購${{ discountData.totalPrice }}</div>
                         <div style="margin-right: 10px;font-size: 16px;align-items: end;display: flex;">目前折扣{{ discountData.totalDiscount }}</div>
-                        <div style="margin-right: 10px;color: #70c1d6;align-items: end;display: flex;">{{ discountData.totalPayment }}</div>
+                        <div style="margin-right: 10px;color: #70c1d6;align-items: end;display: flex;">優惠價${{ discountData.totalPayment }}</div>
                     </div>
                 </div>
             </div>

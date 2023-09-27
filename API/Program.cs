@@ -59,6 +59,14 @@ app.Use(async (context, next) =>
    }
 });
 
+app.UseRouting(); // 必須在 UseEndpoints 之前
+
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapControllers();
+    endpoints.MapHub<GoShopHub>("/GoShopHub"); // 使用SignalR Hub
+});
+
 app.UseStaticFiles();
 
 app.UseAuthorization();

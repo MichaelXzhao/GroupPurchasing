@@ -204,6 +204,8 @@ namespace API.Controllers
                     TotalPrice=0
                 };
             }
+
+            await _hubContext.Clients.All.SendAsync("SendOrderData", new { product = orders[0].product, price = orders[0].price, picture=orders[0].picture, salepageid =orders[0].salepageid, shopid=orders[0].shopid, skuid=orders[0].skuid, memberData, discountData});
            
            return Ok(new { product = orders[0].product, price = orders[0].price, picture=orders[0].picture, salepageid =orders[0].salepageid, shopid=orders[0].shopid, skuid=orders[0].skuid, memberData, discountData}); 
         }
@@ -366,7 +368,7 @@ namespace API.Controllers
                     TotalPrice,
                 };
 
-                await _hubContext.Clients.All.SendAsync("ReceiveMessage", new { product = orders[0].product, price = orders[0].price, picture=orders[0].picture, memberData, discountData});
+                await _hubContext.Clients.All.SendAsync("SendOrderData", new { product = orders[0].product, price = orders[0].price, picture=orders[0].picture, memberData, discountData});
 
                 return Ok(new { product = orders[0].product, price = orders[0].price, picture=orders[0].picture, memberData, discountData});
             }

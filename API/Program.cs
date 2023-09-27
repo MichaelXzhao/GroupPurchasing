@@ -25,6 +25,8 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddScoped<IOrderService, OrderService>();
 
+builder.Services.AddSignalR();
+
 //DB
 DotNetEnv.Env.Load();
 // setting DbContext db connection

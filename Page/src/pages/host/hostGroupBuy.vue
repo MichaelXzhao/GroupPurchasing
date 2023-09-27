@@ -5,6 +5,7 @@ import axios from 'axios'
 import changeqty from '../../function/changeqty';
 import router from '../../router/router';
 import shareURL from '../../function/shareURL';
+import discountTitle from '../../components/discountTitle.vue';
 
 export default{
     setup() {
@@ -54,6 +55,9 @@ export default{
                 console.log(memberData.value)
                 imgurl.value = "https:" + res.data.picture
                 discountData.value = res.data.discountData
+                if(discountData.value.totalPayment!=0&&discountData.value.totalPrice){
+                    data.value.price = data.value.price*(discountData.value.totalPayment/discountData.value.totalPrice)
+                }
             })
             .catch(err=>{
                 console.log(err)
@@ -103,6 +107,9 @@ export default{
                 console.log(memberData.value)
                 imgurl.value = "https:" + res.data.picture
                 discountData.value = res.data.discountData
+                if(discountData.value.totalPayment!=0&&discountData.value.totalPrice){
+                    data.value.price = data.value.price*(discountData.value.totalPayment/discountData.value.totalPrice)
+                }
             })
             .catch(err=>{
                 console.log(err)
@@ -127,7 +134,10 @@ export default{
             gotoProfile
         }
     },
-    components: { Loading }
+    components: { 
+        Loading,
+        discountTitle 
+    }
 }
 </script>
 
@@ -142,6 +152,9 @@ export default{
             <g><g><g><path fill="#ffffff" d="M120.8,1c-7.2,0.8-17.6,3.8-24.1,7.1C77,18,63.6,35.5,58.6,57.6c-1.7,7.5-1.7,20.5,0,28.1c4.5,20.1,16.5,36.5,34.5,47c2.4,1.4,3.7,2.4,3.3,2.6c-0.4,0.2-3.4,1.2-6.7,2.4c-27.1,9.2-51.6,29.5-65.2,54c-7.8,14.1-12.6,29.6-14.1,45.6c-0.8,8.2-0.5,12.5,0.9,14.3c3.6,4.9,9.9,4.9,13.4,0c0.9-1.2,1.1-2.6,1.5-8.5c1-16.5,4.6-30,11.7-43.5c15.6-29.6,45-49.7,78.2-53.6c48.4-5.6,93.5,23,108.8,69.1c3.4,10.1,4.6,17.1,5.5,32.3c0.5,8.1,9.8,10.8,14.6,4.2c1-1.3,1.1-2.1,1-8.3c-0.3-27.1-12-54.7-32.1-75.5c-13.1-13.5-30.1-24.4-47.3-30.2c-3.3-1.1-6.3-2.2-6.7-2.3c-0.5-0.2,0.9-1.2,3.3-2.6c18.2-10.6,30.7-28,34.7-48.3c1.3-6.6,1.2-19.9-0.3-26.6c-6-28.1-26.4-48.8-54.4-55.3C138,1.2,126.1,0.5,120.8,1z M139.4,18c21.1,4.5,36.8,20,42.1,41.4c1.3,5.2,1.6,17.4,0.5,22.5c-2.5,11.3-7.1,20.2-14.7,28.1c-21.5,22.3-56.9,22.4-78.3,0.1c-7.7-8.1-12.4-16.9-14.8-28.2c-0.9-4.1-0.8-16.2,0-20.6c2.2-10.8,7.4-20.8,15.1-28.5c7.8-7.8,18.4-13.3,28.7-15c2.1-0.3,4.1-0.7,4.5-0.8C124.4,16.6,136.2,17.3,139.4,18z"/></g></g></g>
             </svg>
         </div>
+    </div>
+    <div style="background-color: #fff; width: calc(100vw - 17px);height: fit-content;padding-left: 20px;">
+        <discountTitle></discountTitle>
     </div>
     <div class="hostGroupBuy-content">
         <div class="hostGroupBuy-content-content">
@@ -205,10 +218,9 @@ export default{
                         分享連結
                     </button>
                 </div>
-                <div>已選購${{ discountData.totalOriginalPrice }}</div>
-                <div>目前折扣{{ discountData.promotionDiscount }}</div>
-                <div>{{ discountData.promotionDiscountTitle }}</div>
-                <div>{{ discountData.recommendConditionTitle }}</div>
+                <div>已選購${{ discountData.totalPrice }}</div>
+                <div>目前折扣{{ discountData.totalDiscount }}</div>
+                <div>優惠價{{ discountData.totalPayment }}</div>
             </div>
         </div>
     </div>
@@ -233,10 +245,9 @@ export default{
             <div class="hostGroup-list-total">
                 <div class="hostGroup-list-total-total">
                     <div class="hostGroup-list-total-content" style="display: flex;">
-                        <div style="margin-right: 10px;font-size: 16px;align-items: end;display: flex;">已選購${{ discountData.totalOriginalPrice }}</div>
-                        <div style="margin-right: 10px;font-size: 16px;align-items: end;display: flex;">目前折扣{{ discountData.promotionDiscount }}</div>
-                        <div style="margin-right: 10px;font-size: 16px;align-items: end;display: flex;">{{ discountData.recommendConditionTitle }}</div>
-                        <div style="margin-right: 10px;color: #70c1d6;align-items: end;display: flex;">{{ discountData.promotionDiscountTitle }}</div>
+                        <div style="margin-right: 10px;font-size: 16px;align-items: end;display: flex;">已選購${{ discountData.totalPrice }}</div>
+                        <div style="margin-right: 10px;font-size: 16px;align-items: end;display: flex;">目前折扣{{ discountData.totalDiscount }}</div>
+                        <div style="margin-right: 10px;color: #70c1d6;align-items: end;display: flex;">{{ discountData.totalPayment }}</div>
                     </div>
                     <div class="hostGroup-list-total-button">
                         <button class="hostGroup-list-total-button-button" v-on:click="insertCart">提交購物車</button>
@@ -401,7 +412,7 @@ input[type="number"]::-webkit-outer-spin-button {
 
 .hostGroupBuy-content-right-color-content-groupbuy-button{
     border: #e72410 solid 1px;
-    background-color: #e7251065;
+    background-color: #e72510db;
     color: #ffffff;
     width: 120px;
     font-size: 16px;
@@ -410,7 +421,7 @@ input[type="number"]::-webkit-outer-spin-button {
 
 .hostGroupBuy-content-right-color-content-share-button{
     border: #1049e7 solid 1px;
-    background-color: #1049e765;
+    background-color: #1049e7db;
     color: #ffffff;
     width: 120px;
     font-size: 16px;

@@ -26,6 +26,10 @@ const routes = [
     {
         path:"/profile",
         component:()=>import("../pages/profile.vue")
+    },
+    {
+        path:"/dashboard",
+        component:()=>import("../pages/host/hostDashBoard.vue")
     }
 ]
 

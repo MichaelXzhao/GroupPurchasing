@@ -7,6 +7,10 @@ import segmentatesalepageid from "../function/segmentatesalepageid.js"
 export default{
     setup() {
         let username = ref("");
+        let groupbuyname = ref("")
+        let startdate = ref("")
+        let enddate = ref("")
+        let estimatemoney = ref("")
         let createGroupBuy =()=>{
             localStorage.setItem("username", username.value)
             router.push({path:"/createGroupBuy/hostGroupBuy"})
@@ -15,7 +19,14 @@ export default{
             // console.log("HI");
             localStorage.setItem("salepageid", segmentatesalepageid.segmentatesalepageid())
         });
-        return {username, createGroupBuy}
+        return {
+            username,
+            groupbuyname,
+            startdate,
+            enddate,
+            estimatemoney,
+            createGroupBuy
+        }
     },
     components: { Loading }
 }
@@ -40,6 +51,18 @@ export default{
             <div style="text-align: center;margin-bottom: 20px;"><p>一起揪團吧!</p></div>
             <div class="createGroupBuy-content-form-name">
                 <input type="text" class="createGroupBuy-content-form-name-input" placeholder="輸入名稱" v-model="username">
+            </div>
+            <div class="createGroupBuy-content-form-name">
+                <input type="text" class="createGroupBuy-content-form-name-input" placeholder="輸入團購名稱" v-model="groupbuyname">
+            </div>
+            <div class="createGroupBuy-content-form-name">
+                <input type="text" class="createGroupBuy-content-form-name-input" placeholder="輸入開始日期" v-model="startdate">
+            </div>
+            <div class="createGroupBuy-content-form-name">
+                <input type="text" class="createGroupBuy-content-form-name-input" placeholder="輸入結束日期" v-model="enddate">
+            </div>
+            <div class="createGroupBuy-content-form-name">
+                <input type="number" class="createGroupBuy-content-form-name-input" placeholder="預計銷售金額" v-model="estimatemoney">
             </div>
             <div class="createGroupBuy-content-form-button">
                 <button class="createGroupBuy-content-form-button-button" v-on:click="createGroupBuy">開團</button>
@@ -74,7 +97,7 @@ export default{
 
 .createGroupBuy-content-form{
     width: 440px;
-    height: 300px;
+    /* height: 300px; */
     margin: auto;
     border: 1px #DDD solid;
     border-radius: 10px;
@@ -99,6 +122,7 @@ export default{
 
 .createGroupBuy-content-form-name{
     display: flex;
+    margin-bottom: 30px;
 }
 
 .createGroupBuy-content-form-name-input{

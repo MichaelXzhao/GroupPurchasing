@@ -9,6 +9,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@aspnet/signalr": "^1.0.27",
+    "@microsoft/signalr": "^7.0.11",
     "axios": "^1.5.0",
     "vue": "^3.3.4",
     "vue-router": "^4.2.5"

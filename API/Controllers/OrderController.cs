@@ -63,7 +63,7 @@ namespace API.Controllers
         public async Task<ActionResult> GetCartDetail(string salepageid)
         {
             var existingsalepageid = await _dbcontext.Orders
-                    .FirstOrDefaultAsync(o => o.salepageid.Equals(salepageid));
+                    .FirstOrDefaultAsync(o => o.salepageid.Equals(salepageid) && o.status == "unpaid");
             if(existingsalepageid==null){
                 // (1) [GET] product/detail
                 HttpClient client = new HttpClient();
@@ -213,78 +213,8 @@ namespace API.Controllers
 
         [HttpPost("add")]
         public async Task<ActionResult> addorder([FromBody]AddOrderDto input)
-        {
-            
+        {           
             try{
-                //如果下訂者已在同一個商品下過單，則直接在同一成員的數量做變更
-                var existingmember = await _dbcontext.Orders
-                    .FirstOrDefaultAsync(o => o.member == input.user_name && o.product == input.product && o.recommender== input.recommender && o.status=="unpaid");
-                if(existingmember!=null )
-                {
-                    existingmember.qty+=input.product_qty;
-                    //existingmember.points +=1 ; //如果每團友每加購一筆，團長就多一點積分
-                }
-                else
-                {
-                    //如果為新的成員，則直接新增一筆
-                    var newOrders= new Orders{
-                        member=input.user_name,
-                        qty=input.product_qty,
-                        price=input.price,
-                        product=input.product,
-                        picture=input.picture,
-                        salepageid=input.salepageid,
-                        shopid=input.shopid,
-                        skuid=input.skuid, 
-                        recommender=input.recommender,
-                        points =1,
-                        status="unpaid"                   
-                    };
-                    _dbcontext.Orders.Add(newOrders);
-                }     
-                
-                await _dbcontext.SaveChangesAsync();
-
-
-                //回傳所有產品相關的資料
-                var orders = await _dbcontext.Orders
-                    .Where(o => o.product == input.product)
-                    .ToListAsync(); // 獲取所有符合的訂單
-
-                if (orders == null || orders.Count == 0)
-                {
-                    return BadRequest(); 
-                }
-
-                // 用字典合併相同的會員(可能出現在同一成員，在不同推薦人的連結下單)
-                var memberDataDictionary = new Dictionary<string, int>();
-                foreach (var order in orders)
-                {
-                    // 排除掉資料庫中 member=host 的資料
-                    if (order.member == "host" || order.status == "paid")
-                    {
-                        continue;
-                    }
-                    if(memberDataDictionary.ContainsKey(order.member))
-                    {
-                        // 如果已經存在相同的會員，則qty相加
-                        memberDataDictionary[order.member] += order.qty ??0;
-                    }
-                    else
-                    {
-                        // 沒有的話就獨立一筆
-                        memberDataDictionary[order.member] = order.qty ??0;
-                    }                   
-                }
-
-                var memberData = memberDataDictionary.Select(kv => new
-                {
-                    member = kv.Key,
-                    qty = kv.Value,
-                }).ToList(); 
-                Console.WriteLine("memberDataPOST:"+memberData);
-                
-
                 // (1) [POST] cart/insert API
                 HttpClient clientInsert = new HttpClient();
                 HttpRequestMessage requestInsert = new HttpRequestMessage()
@@ -326,10 +256,6 @@ namespace API.Controllers
 
                 Console.WriteLine(responseInsertContent);
 
-                // 加總所有的商品數
-                var totalQty = memberData.Sum(member => member.qty);
-                string totalQtyString = totalQty.ToString();
-
                 // (2)[POST] cart/create
                 HttpClient client = new HttpClient();
                 HttpRequestMessage request = new HttpRequestMessage()
@@ -358,6 +284,92 @@ namespace API.Controllers
                 string TotalDiscount = jsonResponse["data"]["salepageGroupList"][0]["salepageList"][0]["totalDiscount"].ToString();
                 string TotalPayment = jsonResponse["data"]["salepageGroupList"][0]["salepageList"][0]["totalPayment"].ToString();
                 string TotalPrice = jsonResponse["data"]["salepageGroupList"][0]["salepageList"][0]["totalPrice"].ToString();
+                string PromotionId = jsonResponse["data"]["salepageGroupList"][0]["salepageList"][0]["discountDisplayList"][0]["promotionId"].ToString();
+
+            
+                //儲存資料到DB
+                //如果下訂者已在同一個商品下過單，則直接在同一成員的數量做變更
+                var existingmember = await _dbcontext.Orders
+                    .FirstOrDefaultAsync(o => o.member == input.user_name && o.product == input.product && o.recommender== input.recommender && o.status=="unpaid");
+                if(existingmember!=null )
+                {
+                    existingmember.qty+=input.product_qty;
+                    //existingmember.promotionid = PromotionId; 
+                    //existingmember.points +=1 ; //如果每團友每加購一筆，團長就多一點積分
+                }
+                else
+                {
+                    //如果為新的成員，則直接新增一筆
+                    var newOrders= new Orders{
+                        member=input.user_name,
+                        qty=input.product_qty,
+                        price=input.price,
+                        product=input.product,
+                        picture=input.picture,
+                        salepageid=input.salepageid,
+                        shopid=input.shopid,
+                        skuid=input.skuid, 
+                        recommender=input.recommender,
+                        points =1,
+                        status="unpaid"
+                        //promotionid = PromotionId                   
+                    };
+                    _dbcontext.Orders.Add(newOrders);
+                }    
+                await _dbcontext.SaveChangesAsync();
+
+                // 更新 member欄位等於"host" 的資料的 promotionId。只會在host紀錄
+                var hostOrders = await _dbcontext.Orders
+                    .Where(o => o.member == "host" && o.status == "unpaid" && o.salepageid == input.salepageid)
+                    .ToListAsync();
+
+                foreach (var hostOrder in hostOrders)
+                {
+                    hostOrder.promotionid = PromotionId;
+                }                
+                await _dbcontext.SaveChangesAsync();
+
+                //回傳所有產品相關的資料
+                var orders = await _dbcontext.Orders
+                    .Where(o => o.product == input.product)
+                    .ToListAsync(); // 獲取所有符合的訂單
+
+                if (orders == null || orders.Count == 0)
+                {
+                    return BadRequest(); 
+                }
+              
+                // 用字典合併相同的會員(可能出現在同一成員，在不同推薦人的連結下單)
+                var memberDataDictionary = new Dictionary<string, int>();
+                foreach (var order in orders)
+                {
+                    // 排除掉資料庫中 member=host 的資料
+                    if (order.member == "host" || order.status == "paid")
+                    {
+                        continue;
+                    }
+                    if(memberDataDictionary.ContainsKey(order.member))
+                    {
+                        // 如果已經存在相同的會員，則qty相加
+                        memberDataDictionary[order.member] += order.qty ??0;
+                    }
+                    else
+                    {
+                        // 沒有的話就獨立一筆
+                        memberDataDictionary[order.member] = order.qty ??0;
+                    }                   
+                }
+
+                var memberData = memberDataDictionary.Select(kv => new
+                {
+                    member = kv.Key,
+                    qty = kv.Value,
+                }).ToList(); 
+
+                // 加總所有的商品數
+                var totalQty = memberData.Sum(member => member.qty);
+                string totalQtyString = totalQty.ToString();
+                Console.WriteLine("memberDataPOST:"+memberData);
 
                 //回傳所有折扣API相關資料
                 var discountData = new
@@ -369,7 +381,6 @@ namespace API.Controllers
                 };
 
                 await _hubContext.Clients.All.SendAsync("SendOrderData", new { product = orders[0].product, price = orders[0].price, picture=orders[0].picture, memberData, discountData});
-
                 return Ok(new { product = orders[0].product, price = orders[0].price, picture=orders[0].picture, memberData, discountData});
             }
             catch (Exception ex)

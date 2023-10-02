@@ -28,4 +28,14 @@ public partial class Orders
     public int? points { get; set; }
 
     public string? status { get; set; }
+
+    public string? promotionid { get; set; }
+
+    public string? campaign { get; set; }
+
+    public int? estimate { get; set; }
+
+    public DateTime? start { get; set; }
+
+    public DateTime? finish { get; set; }
 }

@@ -6,7 +6,7 @@ import changeqty from '../../function/changeqty';
 import shareURL from '../../function/shareURL';
 import router from '../../router/router';
 import discountTitle from "../../components/discountTitle.vue"
-import * as signalR from "@microsoft/signalr";
+import * as signalR from "@aspnet/signalr";
 
 export default{
     setup() {
@@ -47,17 +47,17 @@ export default{
             await axios.get(import.meta.env.VITE_API_URL+"api/Order/Detail?salepageid=" + localStorage.getItem("salepageid"))
             .then(res=>{
                 console.log(res)
-                data.value = res.data
-                console.log(data.value)
-                memberData.value = res.data.memberData
-                totalqty.value = 0;
-                memberData.value.forEach(element => {
-                    totalqty.value = totalqty.value + element.qty
-                });
-                discountData.value = res.data.discountData
-                if(discountData.value.totalPayment!=0&&discountData.value.totalPrice){
-                    data.value.price = data.value.price*(discountData.value.totalPayment/discountData.value.totalPrice)
-                }
+                // data.value = res.data
+                // console.log(data.value)
+                // memberData.value = res.data.memberData
+                // totalqty.value = 0;
+                // memberData.value.forEach(element => {
+                //     totalqty.value = totalqty.value + element.qty
+                // });
+                // discountData.value = res.data.discountData
+                // if(discountData.value.totalPayment!=0&&discountData.value.totalPrice){
+                //     data.value.price = data.value.price*(discountData.value.totalPayment/discountData.value.totalPrice)
+                // }
             })
             .catch(err=>{
                 console.log(err)
@@ -82,7 +82,18 @@ export default{
             .then(() => {
                 console.log("Connection started");
                 hubConnection.on("SendOrderData", (orderData) => {
-                console.log("Received order data:", orderData);
+                    console.log("Received order data:", orderData);
+                    data.value = orderData
+                    console.log(data.value)
+                    memberData.value = orderData.memberData
+                    totalqty.value = 0;
+                    memberData.value.forEach(element => {
+                        totalqty.value = totalqty.value + element.qty
+                    });
+                    discountData.value = orderData.discountData
+                    if(discountData.value.totalPayment!=0&&discountData.value.totalPrice){
+                        data.value.price = data.value.price*(discountData.value.totalPayment/discountData.value.totalPrice)
+                    }
                 });
             });
 
@@ -213,7 +224,7 @@ export default{
                 </div>
                 <div>已選購${{ discountData.totalPrice }}</div>
                 <div>目前折扣{{ discountData.totalDiscount }}</div>
-                <div style="font-size: 16px ;color: #70c1d6;">優惠價${{ discountData.totalPayment }}</div>
+                <div style="font-size: 16px;color: #70c1d6;">優惠價${{ discountData.totalPayment }}</div>
             </div>
         </div>
     </div>

@@ -6,7 +6,7 @@ import changeqty from '../../function/changeqty';
 import router from '../../router/router';
 import shareURL from '../../function/shareURL';
 import discountTitle from '../../components/discountTitle.vue';
-import * as signalR from "@microsoft/signalr";
+import * as signalR from "@aspnet/signalr";
 
 export default{
     setup() {
@@ -26,6 +26,7 @@ export default{
         let joinGroupBuy = async ()=>{
             console.log(inputqty.value)
             console.log(import.meta.env.VITE_API_URL)
+            console.log(data.value)
             await axios.post(import.meta.env.VITE_API_URL+"api/Order/add",{
                 "user_name": localStorage.getItem("username"),
                 "product_qty": inputqty.value,
@@ -102,7 +103,18 @@ export default{
             .then(() => {
                 console.log("Connection started");
                 hubConnection.on("SendOrderData", (orderData) => {
-                console.log("Received order data:", orderData);
+                    console.log("Received order data:", orderData);
+                    data.value = orderData
+                    console.log(data.value)
+                    memberData.value = orderData.memberData
+                    totalqty.value = 0;
+                    memberData.value.forEach(element => {
+                        totalqty.value = totalqty.value + element.qty
+                    });
+                    discountData.value = orderData.discountData
+                    if(discountData.value.totalPayment!=0&&discountData.value.totalPrice){
+                        data.value.price = data.value.price*(discountData.value.totalPayment/discountData.value.totalPrice)
+                    }
                 });
             });
 

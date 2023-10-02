@@ -10,3 +10,13 @@ public class AddOrderDto
     public string skuid { get; set; }
     public string? recommender { get;set;} = null;
 }
+
+
+public class AddLeaderDto
+{
+    public string campaign { get; set; }
+    public int estimate { get; set; }
+    public string start { get; set; }
+    public string finish { get; set; }
+    public string salepageid { get; set; }
+}

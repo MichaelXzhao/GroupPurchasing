@@ -6,6 +6,7 @@ import changeqty from '../../function/changeqty';
 import router from '../../router/router';
 import shareURL from '../../function/shareURL';
 import discountTitle from '../../components/discountTitle.vue';
+import * as signalR from "@microsoft/signalr";
 
 export default{
     setup() {
@@ -92,6 +93,19 @@ export default{
             router.push({path:"/profile"})
         }
         onMounted(() => {
+            let hubConnection = new signalR.HubConnectionBuilder()
+            .withUrl("/GoShopHub/")
+            .build();
+            // 註冊 MessageHub 的 sendToAllConnections 事件
+            
+            hubConnection.start()
+            .then(() => {
+                console.log("Connection started");
+                hubConnection.on("SendOrderData", (orderData) => {
+                console.log("Received order data:", orderData);
+                });
+            });
+
             loadingDisplay.value = true
             console.log(import.meta.env.VITE_API_URL);
             axios.get(import.meta.env.VITE_API_URL+"api/Order/Detail?salepageid=" + localStorage.getItem("salepageid"))

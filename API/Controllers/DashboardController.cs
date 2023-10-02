@@ -23,22 +23,26 @@ namespace API.Controllers
             _dbcontext = dbcontext;
         }
 
-        // [HttpGet("Grouplist")]
+        // [HttpGet("Grouplist")] salepageid和campaign來判斷
         // public async Task<ActionResult> GetGroupList(string campaign, int estimate, string start, string finish, string salepageid)
         // {
         //     var Orders = await _dbcontext.Orders
-        //         .Where(o => o.member == "host" && o.status == "unpaid" && o.salepageid == salepageid)
-        //         .ToListAsync();
+        //         .Where(o => o.campaign == campaign && o.status == "unpaid" && o.salepageid == salepageid)
+        //         .FindFirst();
+
+        //         Orders.
 
             
 
-        //     foreach (var Order in Orders)
-        //     {
-        //         Order.campaign = input.campaign;
-        //         Order.estimate = input.estimate;
-        //         Order.start = DateTime.Parse(input.start);
-        //         Order.finish = DateTime.Parse(input.finish);
-        //     }                
+        // GroupListData = new
+        // {
+        //     campaign,                 
+        //     memberqty,
+        //     discount,                   
+        //     realamount,
+        //     start,
+        //     finish
+        // };              
 
 
         //     return Ok();

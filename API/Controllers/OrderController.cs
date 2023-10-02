@@ -320,7 +320,7 @@ namespace API.Controllers
 
                 // 更新 member欄位等於"host" 的資料的 promotionId。只會在host紀錄
                 var hostOrders = await _dbcontext.Orders
-                    .Where(o => o.member == "host" && o.status == "unpaid" && o.salepageid == input.salepageid)
+                    .Where(o => o.status == "unpaid" && o.salepageid == input.salepageid)
                     .ToListAsync();
 
                 foreach (var hostOrder in hostOrders)
@@ -328,6 +328,32 @@ namespace API.Controllers
                     hostOrder.promotionid = PromotionId;
                 }                
                 await _dbcontext.SaveChangesAsync();
+
+                // 將host的資料存到其他member欄位
+                // 複製的資料
+                var matchingOrders = await _dbcontext.Orders
+                    .Where(o => o.member == "host" && o.salepageid == input.salepageid && o.status == "unpaid")
+                    .ToListAsync();
+
+                // 貼上的資料
+                var matchingOrder = await _dbcontext.Orders
+                    .Where(o => o.member != "host" && o.salepageid == input.salepageid && o.status == "unpaid")
+                    .ToListAsync();
+
+                if (matchingOrders.Any())
+                {
+                    // 符合條件的記錄，找到最新的記錄
+                    var latestOrder = matchingOrder.OrderByDescending(o => o.id).FirstOrDefault();
+
+                    // 直接更新符合條件的記錄的 promotionid、campaign 和 estimate
+                    latestOrder.promotionid = matchingOrders[0].promotionid;
+                    latestOrder.campaign = matchingOrders[0].campaign;
+                    latestOrder.estimate = matchingOrders[0].estimate;
+                    latestOrder.start = matchingOrders[0].start;
+                    latestOrder.finish = matchingOrders[0].finish;
+
+                    await _dbcontext.SaveChangesAsync();
+                }
 
                 //回傳所有產品相關的資料
                 var orders = await _dbcontext.Orders

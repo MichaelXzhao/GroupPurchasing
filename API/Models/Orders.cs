@@ -29,13 +29,15 @@ public partial class Orders
 
     public string? status { get; set; }
 
-    public string? promotionid { get; set; }
-
     public string? campaign { get; set; }
 
-    public int? estimate { get; set; }
+    public string? start { get; set; }
 
-    public DateTime? start { get; set; }
+    public string? finish { get; set; }
 
-    public DateTime? finish { get; set; }
+    public int? afterdiscount { get; set; }
+
+    public int? totaldiscount { get; set; }
+
+    public int? totalprice { get; set; }
 }

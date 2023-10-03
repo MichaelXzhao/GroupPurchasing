@@ -15,7 +15,6 @@ public class AddOrderDto
 public class AddLeaderDto
 {
     public string campaign { get; set; }
-    public int estimate { get; set; }
     public string start { get; set; }
     public string finish { get; set; }
     public string salepageid { get; set; }

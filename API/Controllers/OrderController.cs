@@ -62,53 +62,53 @@ namespace API.Controllers
         [HttpGet("Detail")]
         public async Task<ActionResult> GetCartDetail(string salepageid)
         {
-            var existingsalepageid = await _dbcontext.Orders
-                    .FirstOrDefaultAsync(o => o.salepageid.Equals(salepageid) && o.status == "unpaid");
-            if(existingsalepageid==null){
-                // (1) [GET] product/detail
-                HttpClient client = new HttpClient();
-                HttpRequestMessage request = new HttpRequestMessage()
-                {
-                    Method = HttpMethod.Get,
-                    RequestUri = new Uri($"https://10230.shop.qa.91dev.tw/webapi/SalePageV2/GetSalePageV2Info/10230/{salepageid}"),
-                };
-                string requestBody = "{\r\n    \"source\": \"Web\"\r\n}"; // 替換為request正文
-                request.Content = new StringContent(requestBody, Encoding.UTF8, "application/json");
-                // 發送request並等待
-                HttpResponseMessage response = await client.SendAsync(request);
+            // var existingsalepageid = await _dbcontext.Orders
+            //         .FirstOrDefaultAsync(o => o.salepageid.Equals(salepageid) && o.status == "開團中");
+            // if(existingsalepageid==null){
+            //     // (1) [GET] product/detail
+            //     HttpClient client = new HttpClient();
+            //     HttpRequestMessage request = new HttpRequestMessage()
+            //     {
+            //         Method = HttpMethod.Get,
+            //         RequestUri = new Uri($"https://10230.shop.qa.91dev.tw/webapi/SalePageV2/GetSalePageV2Info/10230/{salepageid}"),
+            //     };
+            //     string requestBody = "{\r\n    \"source\": \"Web\"\r\n}"; // 替換為request正文
+            //     request.Content = new StringContent(requestBody, Encoding.UTF8, "application/json");
+            //     // 發送request並等待
+            //     HttpResponseMessage response = await client.SendAsync(request);
 
-                // 讀取回傳response
-                string responseContent = await response.Content.ReadAsStringAsync();
+            //     // 讀取回傳response
+            //     string responseContent = await response.Content.ReadAsStringAsync();
 
-                // 解析JSON response 為 JObject
-                JObject jsonResponse = JObject.Parse(responseContent);
+            //     // 解析JSON response 為 JObject
+            //     JObject jsonResponse = JObject.Parse(responseContent);
             
-                // 抓取商品資訊
-                string nineyi_salepageid = jsonResponse["Data"]["Id"].ToString();
-                string nineyi_shopid = jsonResponse["Data"]["ShopId"].ToString();
-                string nineyi_title = jsonResponse["Data"]["Title"].ToString();
-                string priceStr = jsonResponse["Data"]["Price"].ToString();
-                int nineyi_price = Convert.ToInt32(priceStr);
-                string nineyi_picurl = jsonResponse["Data"]["ImageList"][0]["PicUrl"].ToString();
-                string nineyi_sku = jsonResponse["Data"]["SaleProductSKUIdList"][0].ToString();
+            //     // 抓取商品資訊
+            //     string nineyi_salepageid = jsonResponse["Data"]["Id"].ToString();
+            //     string nineyi_shopid = jsonResponse["Data"]["ShopId"].ToString();
+            //     string nineyi_title = jsonResponse["Data"]["Title"].ToString();
+            //     string priceStr = jsonResponse["Data"]["Price"].ToString();
+            //     int nineyi_price = Convert.ToInt32(priceStr);
+            //     string nineyi_picurl = jsonResponse["Data"]["ImageList"][0]["PicUrl"].ToString();
+            //     string nineyi_sku = jsonResponse["Data"]["SaleProductSKUIdList"][0].ToString();
 
-                //儲存到DB
-                var newOrders= new Orders{
-                    member="host",
-                    qty=0,
-                    price=nineyi_price,
-                    product=nineyi_title,
-                    picture=nineyi_picurl,
-                    salepageid=nineyi_salepageid,
-                    shopid=nineyi_shopid,
-                    skuid=nineyi_sku,
-                    recommender=null,
-                    points=0,
-                    status="unpaid"
-                };
-                _dbcontext.Orders.Add(newOrders);
-                await _dbcontext.SaveChangesAsync();              
-            }
+            //     //儲存到DB
+            //     var newOrders= new Orders{
+            //         member="host",
+            //         qty=0,
+            //         price=nineyi_price,
+            //         product=nineyi_title,
+            //         picture=nineyi_picurl,
+            //         salepageid=nineyi_salepageid,
+            //         shopid=nineyi_shopid,
+            //         skuid=nineyi_sku,
+            //         recommender=null,
+            //         points=0,
+            //         status="開團中"
+            //     };
+            //     _dbcontext.Orders.Add(newOrders);
+            //     await _dbcontext.SaveChangesAsync();              
+            // }
            
             var orders = await _dbcontext.Orders
                 .Where(o => o.salepageid.Equals(salepageid))
@@ -125,7 +125,7 @@ namespace API.Controllers
             foreach (var order in orders)
             {
                 // 排除掉資料庫中 member=host 的資料
-                if (order.member == "host" || order.status == "paid")
+                if (order.member == "host" || order.status == "已結團")
                 {
                     continue;
                 }
@@ -150,7 +150,7 @@ namespace API.Controllers
             Console.WriteLine("memberDataGET:"+memberData);
 
             // 加總所有的商品數
-            var totalQty = orders.Where(order => order.status.Trim() == "unpaid").Sum(member => member.qty);
+            var totalQty = orders.Where(order => order.status == "開團中").Sum(member => member.qty);
             string totalQtyString = totalQty.ToString();
             var discountData=(object)null;
 
@@ -282,20 +282,21 @@ namespace API.Controllers
 
                 // 取得其他折扣、原價金額
                 string TotalDiscount = jsonResponse["data"]["salepageGroupList"][0]["salepageList"][0]["totalDiscount"].ToString();
+                int totaldiscount=int.Parse(TotalDiscount);
                 string TotalPayment = jsonResponse["data"]["salepageGroupList"][0]["salepageList"][0]["totalPayment"].ToString();
+                int afterdiscount=int.Parse(TotalPayment);
                 string TotalPrice = jsonResponse["data"]["salepageGroupList"][0]["salepageList"][0]["totalPrice"].ToString();
+                int totalprice=int.Parse(TotalPrice);
                 string PromotionId = jsonResponse["data"]["salepageGroupList"][0]["salepageList"][0]["discountDisplayList"][0]["promotionId"].ToString();
 
-            
+           
                 //儲存資料到DB
                 //如果下訂者已在同一個商品下過單，則直接在同一成員的數量做變更
                 var existingmember = await _dbcontext.Orders
-                    .FirstOrDefaultAsync(o => o.member == input.user_name && o.product == input.product && o.recommender== input.recommender && o.status=="unpaid");
+                    .FirstOrDefaultAsync(o => o.member == input.user_name && o.product == input.product && o.recommender== input.recommender && o.status=="開團中");
                 if(existingmember!=null )
                 {
                     existingmember.qty+=input.product_qty;
-                    //existingmember.promotionid = PromotionId; 
-                    //existingmember.points +=1 ; //如果每團友每加購一筆，團長就多一點積分
                 }
                 else
                 {
@@ -311,33 +312,42 @@ namespace API.Controllers
                         skuid=input.skuid, 
                         recommender=input.recommender,
                         points =1,
-                        status="unpaid"
-                        //promotionid = PromotionId                   
+                        status="開團中",                   
                     };
                     _dbcontext.Orders.Add(newOrders);
                 }    
                 await _dbcontext.SaveChangesAsync();
 
-                // 更新 member欄位等於"host" 的資料的 promotionId。只會在host紀錄
-                var hostOrders = await _dbcontext.Orders
-                    .Where(o => o.status == "unpaid" && o.salepageid == input.salepageid)
+                var existingdata = await _dbcontext.Orders
+                    .Where(o => o.product == input.product && o.status == "開團中" && o.salepageid == input.salepageid)
                     .ToListAsync();
 
-                foreach (var hostOrder in hostOrders)
+                if (existingdata != null)
                 {
-                    hostOrder.promotionid = PromotionId;
-                }                
-                await _dbcontext.SaveChangesAsync();
+                    foreach (var data in existingdata)
+                    {
+                        data.totaldiscount = totaldiscount;
+                        data.afterdiscount = afterdiscount;
+                        data.totalprice = totalprice;
+                    }
+
+                    await _dbcontext.SaveChangesAsync();
+                }
+                else
+                {
+                    return BadRequest();
+                }
+
 
                 // 將host的資料存到其他member欄位
                 // 複製的資料
                 var matchingOrders = await _dbcontext.Orders
-                    .Where(o => o.member == "host" && o.salepageid == input.salepageid && o.status == "unpaid")
+                    .Where(o => o.member == "host" && o.salepageid == input.salepageid && o.status == "開團中")
                     .ToListAsync();
 
                 // 貼上的資料
                 var matchingOrder = await _dbcontext.Orders
-                    .Where(o => o.member != "host" && o.salepageid == input.salepageid && o.status == "unpaid")
+                    .Where(o => o.member != "host" && o.salepageid == input.salepageid && o.status == "開團中")
                     .ToListAsync();
 
                 if (matchingOrders.Any())
@@ -345,8 +355,6 @@ namespace API.Controllers
                     // 符合條件的記錄，找到最新的記錄
                     var latestOrder = matchingOrder.OrderByDescending(o => o.id).FirstOrDefault();
 
-                    // 直接更新符合條件的記錄的 promotionid、campaign 和 estimate
-                    latestOrder.promotionid = matchingOrders[0].promotionid;
                     latestOrder.campaign = matchingOrders[0].campaign;
                     latestOrder.estimate = matchingOrders[0].estimate;
                     latestOrder.start = matchingOrders[0].start;
@@ -354,6 +362,8 @@ namespace API.Controllers
 
                     await _dbcontext.SaveChangesAsync();
                 }
+
+
 
                 //回傳所有產品相關的資料
                 var orders = await _dbcontext.Orders
@@ -370,7 +380,7 @@ namespace API.Controllers
                 foreach (var order in orders)
                 {
                     // 排除掉資料庫中 member=host 的資料
-                    if (order.member == "host" || order.status == "paid")
+                    if (order.member == "host" || order.status == "已結團")
                     {
                         continue;
                     }

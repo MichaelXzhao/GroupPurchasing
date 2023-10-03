@@ -244,7 +244,7 @@ namespace API.Controllers
 
                 foreach (var order in orders)
                 {
-                    order.status = "paid"; 
+                    order.status = "已結團"; 
                 }
                 await _dbcontext.SaveChangesAsync();
    

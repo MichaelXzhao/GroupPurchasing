@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json.Linq;
 using System.Text;
 using Newtonsoft.Json;
+using System.Security.Cryptography;
 
 
 namespace API.Controllers
@@ -20,6 +21,15 @@ namespace API.Controllers
         public DashboardController(GoShopContext dbcontext)
         {
             _dbcontext = dbcontext;
+        }
+
+        private string HashLink(string username)
+        {
+            using (var sha256 = SHA256.Create())
+            {
+                var hashedBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(username));
+                return BitConverter.ToString(hashedBytes).Replace("-", "").ToLower();
+            }
         }
 
         [HttpGet("Grouplist")]
@@ -37,7 +47,7 @@ namespace API.Controllers
                 Start = group.Select(o => o.start).FirstOrDefault(),
                 Finish = group.Select(o => o.finish).FirstOrDefault(),
                 Status = group.Select(o => o.status) .FirstOrDefault(),
-                Membercount = group.Count(o => o.member != "host") // 計算 member 不等於 host 的數量
+                Membercount = group.Count(o => o.qty!=0 )
             })
             .ToList();
 
@@ -79,14 +89,15 @@ namespace API.Controllers
                 string nineyi_picurl = jsonResponse["Data"]["ImageList"][0]["PicUrl"].ToString();
                 string nineyi_sku = jsonResponse["Data"]["SaleProductSKUIdList"][0].ToString();
 
+
                 //儲存到DB
                 var newOrders= new Orders{
-                    member="host",
+                    member=input.user_name,
                     qty=0,
                     price=nineyi_price,
                     product=nineyi_title,
                     picture=nineyi_picurl,
-                    salepageid=nineyi_salepageid,
+                    salepageid=input.salepageid,
                     shopid=nineyi_shopid,
                     skuid=nineyi_sku,
                     recommender=null,
@@ -94,7 +105,9 @@ namespace API.Controllers
                     status="開團中",
                     campaign = input.campaign,
                     start = input.start,
-                    finish = input.finish
+                    finish = input.finish,
+                    sharelink=HashLink(input.user_name),
+                    role="host" 
                 };
                 _dbcontext.Orders.Add(newOrders);
                 await _dbcontext.SaveChangesAsync();              

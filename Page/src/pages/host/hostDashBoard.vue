@@ -6,6 +6,7 @@ import changeqty from '../../function/changeqty';
 import router from '../../router/router';
 import shareURL from '../../function/shareURL';
 import * as signalR from "@aspnet/signalr";
+import Plotly from 'plotly.js-dist-min'
 
 export default{
     setup() {
@@ -28,6 +29,26 @@ export default{
             .then(res=>{
                 console.log(res)
                 data.value = res.data
+                let plotlyprice = [];
+                let plotlyname = [];
+                data.value.forEach(element => {
+                    plotlyprice.push(element.totaldiscount)
+                    plotlyname.push(element.campaign)
+                });
+                setTimeout(() => {
+                    var data = [{
+                        values: plotlyprice,
+                        labels: plotlyname,
+                        type: 'pie'
+                    }];
+
+                    var layout = {
+                        height: 400,
+                        width: 500
+                    };
+
+                    Plotly.newPlot('myDiv', data, layout);
+                }, 2000);
             })
             .catch(err=>{
                 console.log(err)
@@ -69,9 +90,9 @@ export default{
                 結束時間:
                 <input type="date" placeholder="結束時間" v-model="endDate">
             </div>
-            <div>
+            <!-- <div>
                 <button class="search-range-start-end-button">尋找</button>
-            </div>
+            </div> -->
         </div>
     </div>
     <div class="hostGroup-list">
@@ -104,6 +125,7 @@ export default{
             </table>
         </div>
     </div>
+    <div id='myDiv'><!-- Plotly chart will be drawn inside this DIV --></div>
 </template>
 
 <style scoped>

@@ -40,4 +40,8 @@ public partial class Orders
     public int? totaldiscount { get; set; }
 
     public int? totalprice { get; set; }
+
+    public string? sharelink { get; set; }
+
+    public string? role { get; set; }
 }

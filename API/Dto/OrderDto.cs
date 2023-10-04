@@ -8,12 +8,13 @@ public class AddOrderDto
     public string salepageid { get; set; }
     public string shopid { get; set; }
     public string skuid { get; set; }
-    public string? recommender { get;set;} = null;
+    public string? sharelink { get;set;} = null;
 }
 
 
 public class AddLeaderDto
 {
+    public string user_name { get; set; }
     public string campaign { get; set; }
     public string start { get; set; }
     public string finish { get; set; }

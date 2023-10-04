@@ -8,6 +8,7 @@ using Newtonsoft.Json.Linq;
 using System.Text;
 using Newtonsoft.Json;
 using Microsoft.AspNetCore.SignalR;
+using System.Security.Cryptography;
 
 
 namespace API.Controllers
@@ -56,60 +57,20 @@ namespace API.Controllers
 
             return null; // 如果沒找到"UniqueKeyToken"，回傳null
         }
+        private string HashLink(string username)
+        {
+            using (var sha256 = SHA256.Create())
+            {
+                var hashedBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(username));
+                return BitConverter.ToString(hashedBytes).Replace("-", "").ToLower();
+            }
+        }
 
         string cookie = "gaClientId=aac6bbb6-42e8-4566-beb6-70b39ecccd46; __lt__cid=2178dfab-832a-424c-ad74-beab110fcd4f; uAUTH=KUgNJm2SrPlcG9oZpdbaEij5WqcNRzaS3IlESf4JfVYZiTFE/8OAb3ljMvqGTjKsoIxG47NEDSR0SNEGQq4w/Px3lVuGZHvp5cAxzWAUMbI=; uAUTH_samesite=KUgNJm2SrPlcG9oZpdbaEij5WqcNRzaS3IlESf4JfVYZiTFE/8OAb3ljMvqGTjKsoIxG47NEDSR0SNEGQq4w/Px3lVuGZHvp5cAxzWAUMbI=; _fbp=fb.1.1695024637093.1648731515; ai_user=neuP9|2023-09-18T08:11:11.189Z; GUID=8b7f9804-9726-4894-94f4-16c594486040; allowGetPrivacyInfo=true; _ga=GA1.1.aac6bbb6-42e8-4566-beb6-70b39ecccd46; _ga=GA1.2.aac6bbb6-42e8-4566-beb6-70b39ecccd46; auth=od+XMJjXjeNCLaky+2jWL8+c+/Yqgxf2syxeW2oYUoF5ajC1dJZxe2d7qV2gK9+/mKN5XPlgy7iEU7KZpsuu12RBJYtTlImeuhEPKs8nf2lkLDvC1poe7lbPK9k/ZPcjZXP/eR51ijOD4Ql3pCDaKSrMi3oUoLYOJqLI5pQQ5JBofoUZjs5vnZ2iqnfZvIrNUl7NTvob1byrMdFvBMeKhB9NpV0/z6vVjhRD3fCqhCIBjM2uFzc5KtmM7qdgWIVNGa+ZiDIJsxHy8yoUcn0dM1W3SX1msZzglokOBiHG1aSgSo2drq6mjAIPqPZbwPAnlnYlAeNB+6IjKGDSn6d1ifSgrrztIzoEDBo8CaXyBiFgyHEWiF+jMe42MofgnyzhkHvI1yl8uNAwFU3qPJWtzZ6GtDRY/fezEPzZhoedAPZgcrWFlmHnmE3I4wIPcAH+RokEnsBGPMrBA6Czzlv6IXQEcrIkw52Piq+JcZiSVvuOMGYhR41MZaeHMAeBTqytZLUx4kkEwXa9DOUkQs3QuRuzbSqMmx70O9zwWW2pkZMKiZ94JDrJ+BWIn/tAqGqfGTHBuXzYpUvdtdKsHuxjFvWSfHvOqFzpuTZt6mEILqWdtta3vVwNJ5Z0d0b7Nk60jbqRYY1DSOX98vbI9Sv3a6wXAoAWZREyaMCfhAMXlSFzX810hUGuavcwZdfRC++8anoCzDWEOD7FmWJONOJ0L3ojI5GuJW340kQhHUU2UQkk2Z7Ga7sXgxLccyWwA0spFFn6O0z1RZY/vOrTC2pZ6bi9hhm9ymEdNS3bBOSrHUo=; auth_samesite=od+XMJjXjeNCLaky+2jWL8+c+/Yqgxf2syxeW2oYUoF5ajC1dJZxe2d7qV2gK9+/mKN5XPlgy7iEU7KZpsuu12RBJYtTlImeuhEPKs8nf2lkLDvC1poe7lbPK9k/ZPcjZXP/eR51ijOD4Ql3pCDaKSrMi3oUoLYOJqLI5pQQ5JBofoUZjs5vnZ2iqnfZvIrNUl7NTvob1byrMdFvBMeKhB9NpV0/z6vVjhRD3fCqhCIBjM2uFzc5KtmM7qdgWIVNGa+ZiDIJsxHy8yoUcn0dM1W3SX1msZzglokOBiHG1aSgSo2drq6mjAIPqPZbwPAnlnYlAeNB+6IjKGDSn6d1ifSgrrztIzoEDBo8CaXyBiFgyHEWiF+jMe42MofgnyzhkHvI1yl8uNAwFU3qPJWtzZ6GtDRY/fezEPzZhoedAPZgcrWFlmHnmE3I4wIPcAH+RokEnsBGPMrBA6Czzlv6IXQEcrIkw52Piq+JcZiSVvuOMGYhR41MZaeHMAeBTqytZLUx4kkEwXa9DOUkQs3QuRuzbSqMmx70O9zwWW2pkZMKiZ94JDrJ+BWIn/tAqGqfGTHBuXzYpUvdtdKsHuxjFvWSfHvOqFzpuTZt6mEILqWdtta3vVwNJ5Z0d0b7Nk60jbqRYY1DSOX98vbI9Sv3a6wXAoAWZREyaMCfhAMXlSFzX810hUGuavcwZdfRC++8anoCzDWEOD7FmWJONOJ0L3ojI5GuJW340kQhHUU2UQkk2Z7Ga7sXgxLccyWwA0spFFn6O0z1RZY/vOrTC2pZ6bi9hhm9ymEdNS3bBOSrHUo=; MID=5500747275; lang=zh-TW; _clck=1gwpfc9|2|ffk|0|1356; currency=TWD; __lt__sid=911bb3e4-4de63749; 91_FPID_v3_4_1=bba2f0d057c32f7f3e3043895830d1c5; _gat=1; ai_session=G7A2Y|1696400844771|1696400887886.5; _clsk=frehas|1696400888391|2|1|s.clarity.ms/collect";
 
         [HttpGet("Detail")]
         public async Task<ActionResult> GetCartDetail(string salepageid)
         {
-            // var existingsalepageid = await _dbcontext.Orders
-            //         .FirstOrDefaultAsync(o => o.salepageid.Equals(salepageid) && o.status == "開團中");
-            // if(existingsalepageid==null){
-            //     // (1) [GET] product/detail
-            //     HttpClient client = new HttpClient();
-            //     HttpRequestMessage request = new HttpRequestMessage()
-            //     {
-            //         Method = HttpMethod.Get,
-            //         RequestUri = new Uri($"https://10230.shop.qa.91dev.tw/webapi/SalePageV2/GetSalePageV2Info/10230/{salepageid}"),
-            //     };
-            //     string requestBody = "{\r\n    \"source\": \"Web\"\r\n}"; // 替換為request正文
-            //     request.Content = new StringContent(requestBody, Encoding.UTF8, "application/json");
-            //     // 發送request並等待
-            //     HttpResponseMessage response = await client.SendAsync(request);
-
-            //     // 讀取回傳response
-            //     string responseContent = await response.Content.ReadAsStringAsync();
-
-            //     // 解析JSON response 為 JObject
-            //     JObject jsonResponse = JObject.Parse(responseContent);
-            
-            //     // 抓取商品資訊
-            //     string nineyi_salepageid = jsonResponse["Data"]["Id"].ToString();
-            //     string nineyi_shopid = jsonResponse["Data"]["ShopId"].ToString();
-            //     string nineyi_title = jsonResponse["Data"]["Title"].ToString();
-            //     string priceStr = jsonResponse["Data"]["Price"].ToString();
-            //     int nineyi_price = Convert.ToInt32(priceStr);
-            //     string nineyi_picurl = jsonResponse["Data"]["ImageList"][0]["PicUrl"].ToString();
-            //     string nineyi_sku = jsonResponse["Data"]["SaleProductSKUIdList"][0].ToString();
-
-            //     //儲存到DB
-            //     var newOrders= new Orders{
-            //         member="host",
-            //         qty=0,
-            //         price=nineyi_price,
-            //         product=nineyi_title,
-            //         picture=nineyi_picurl,
-            //         salepageid=nineyi_salepageid,
-            //         shopid=nineyi_shopid,
-            //         skuid=nineyi_sku,
-            //         recommender=null,
-            //         points=0,
-            //         status="開團中"
-            //     };
-            //     _dbcontext.Orders.Add(newOrders);
-            //     await _dbcontext.SaveChangesAsync();              
-            // }
-           
             var orders = await _dbcontext.Orders
                 .Where(o => o.salepageid.Equals(salepageid))
                 .ToListAsync(); // 獲取所有符合的訂單
@@ -122,10 +83,11 @@ namespace API.Controllers
 
             // 用字典合併相同的會員(可能出現在同一成員，在不同推薦人的連結下單)
             var memberDataDictionary = new Dictionary<string, int>();
+            var sharelink = string.Empty;
             foreach (var order in orders)
             {
-                // 排除掉資料庫中 member=host 的資料
-                if (order.member == "host" || order.status == "已結團")
+                // 排除掉資料庫中 role=host 的資料
+                if (order.status == "已結團")
                 {
                     continue;
                 }
@@ -139,6 +101,7 @@ namespace API.Controllers
                 {
                     // 沒有的話就獨立一筆
                     memberDataDictionary[order.member] = order.qty ??0;
+                    //sharelink=order.sharelink;
                 }                   
             }
 
@@ -146,6 +109,7 @@ namespace API.Controllers
             {
                 member = kv.Key,
                 qty = kv.Value,
+                sharelink=orders.FirstOrDefault(o=>o.member==kv.Key)?.sharelink??""
             }).ToList();
             Console.WriteLine("memberDataGET:"+memberData);
 
@@ -289,11 +253,22 @@ namespace API.Controllers
                 int totalprice=int.Parse(TotalPrice);
                 string PromotionId = jsonResponse["data"]["salepageGroupList"][0]["salepageList"][0]["discountDisplayList"][0]["promotionId"].ToString();
 
-           
+
+                var existingOrder = await _dbcontext.Orders
+                    .FirstOrDefaultAsync(o => o.sharelink == input.sharelink);
+
+                var recommender = string.Empty;
+                if (existingOrder != null)
+                {
+                    // 找到具有相同sharelink的訂單，取其member
+                    recommender = existingOrder.member;
+                }
+
+
                 //儲存資料到DB
                 //如果下訂者已在同一個商品下過單，則直接在同一成員的數量做變更
                 var existingmember = await _dbcontext.Orders
-                    .FirstOrDefaultAsync(o => o.member == input.user_name && o.product == input.product && o.recommender== input.recommender && o.status=="開團中");
+                    .FirstOrDefaultAsync(o => o.member == input.user_name && o.product == input.product && o.status=="開團中");
                 if(existingmember!=null )
                 {
                     existingmember.qty+=input.product_qty;
@@ -310,9 +285,10 @@ namespace API.Controllers
                         salepageid=input.salepageid,
                         shopid=input.shopid,
                         skuid=input.skuid, 
-                        recommender=input.recommender,
+                        recommender=recommender,
                         points =1,
-                        status="開團中",                   
+                        status="開團中",    
+                        sharelink=HashLink(input.user_name)             
                     };
                     _dbcontext.Orders.Add(newOrders);
                 }    
@@ -342,12 +318,12 @@ namespace API.Controllers
                 // 將host的資料存到其他member欄位
                 // 複製的資料
                 var matchingOrders = await _dbcontext.Orders
-                    .Where(o => o.member == "host" && o.salepageid == input.salepageid && o.status == "開團中")
+                    .Where(o => o.role == "host" && o.salepageid == input.salepageid && o.status == "開團中")
                     .ToListAsync();
 
                 // 貼上的資料
                 var matchingOrder = await _dbcontext.Orders
-                    .Where(o => o.member != "host" && o.salepageid == input.salepageid && o.status == "開團中")
+                    .Where(o => o.role != "host" && o.salepageid == input.salepageid && o.status == "開團中")
                     .ToListAsync();
 
                 if (matchingOrders.Any())
@@ -361,7 +337,6 @@ namespace API.Controllers
 
                     await _dbcontext.SaveChangesAsync();
                 }
-
 
 
                 //回傳所有產品相關的資料
@@ -378,8 +353,8 @@ namespace API.Controllers
                 var memberDataDictionary = new Dictionary<string, int>();
                 foreach (var order in orders)
                 {
-                    // 排除掉資料庫中 member=host 的資料
-                    if (order.member == "host" || order.status == "已結團")
+                    // 排除掉資料庫中 role=host 的資料
+                    if (order.status == "已結團")
                     {
                         continue;
                     }

@@ -1,21 +1,64 @@
 <script>
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, computed } from 'vue';
 import Loading from "../../components/Loading.vue"
 import axios from 'axios'
 import changeqty from '../../function/changeqty';
 import router from '../../router/router';
 import shareURL from '../../function/shareURL';
 import * as signalR from "@aspnet/signalr";
+import Plotly from 'plotly.js-dist-min'
 
 export default{
     setup() {
+        let data = ref({})
+        let startDate = ref('2023-10-01');
+        let endDate = ref('2023-10-31');
         let gotoProfile = ()=>{
             router.push({path:"/profile"})
         }
+        let filteredData = computed(() => {
+            return data.value.filter(item => {
+                const itemDate = new Date(item.start);
+                const sDate = new Date(startDate.value);
+                const eDate = new Date(endDate.value);
+                return itemDate >= sDate && itemDate <= eDate;
+            });
+        });
         onMounted(() => {
-            
+            axios.get(import.meta.env.VITE_API_URL + "api/Dashboard/Grouplist")
+            .then(res=>{
+                console.log(res)
+                data.value = res.data
+                let plotlyprice = [];
+                let plotlyname = [];
+                data.value.forEach(element => {
+                    plotlyprice.push(element.totaldiscount)
+                    plotlyname.push(element.campaign)
+                });
+                setTimeout(() => {
+                    var data = [{
+                        values: plotlyprice,
+                        labels: plotlyname,
+                        type: 'pie'
+                    }];
+
+                    var layout = {
+                        height: 400,
+                        width: 500
+                    };
+
+                    Plotly.newPlot('myDiv', data, layout);
+                }, 2000);
+            })
+            .catch(err=>{
+                console.log(err)
+            })
         });
         return {
+            data,
+            filteredData,
+            startDate,
+            endDate,
             gotoProfile
         }
     },
@@ -37,34 +80,52 @@ export default{
             </svg>
         </div>
     </div>
-    <div class="hostGroup-list">
-            <div class="hostGroup-list-table">
-                <table class="hostGroup-list-table-table">
-                    <thead class="hostGroup-list-table-table-thead">
-                        <tr>
-                            <th>團購活動名稱</th>
-                            <th>折扣門檻</th>
-                            <th>預計銷售金額</th>
-                            <th>實際銷售金額</th>
-                            <th>參與人數</th>
-                            <th>開始時間</th>
-                            <th>結束時間</th>
-                        </tr>
-                    </thead>
-                    <tbody class="hostGroup-list-table-table-tbody">
-                        <tr>
-                            <td>Irene大買家</td>
-                            <td>10</td>
-                            <td>10</td>
-                            <td>10</td>
-                            <td>10</td>
-                            <td>20231111</td>
-                            <td>20231111</td>
-                        </tr>
-                    </tbody>
-                </table>
+    <div class="search-range-content">
+        <div class="search-range">
+            <div class="search-range-start-end">
+                開始時間:
+                <input type="date" placeholder="開始時間" v-model="startDate">
             </div>
+            <div class="search-range-start-end">
+                結束時間:
+                <input type="date" placeholder="結束時間" v-model="endDate">
+            </div>
+            <!-- <div>
+                <button class="search-range-start-end-button">尋找</button>
+            </div> -->
         </div>
+    </div>
+    <div class="hostGroup-list">
+        <div class="hostGroup-list-table">
+            <table class="hostGroup-list-table-table">
+                <thead class="hostGroup-list-table-table-thead">
+                    <tr>
+                        <th>團購活動名稱</th>
+                        <th>折扣門檻</th>
+                        <th>預計銷售金額</th>
+                        <th>實際銷售金額</th>
+                        <th>參與人數</th>
+                        <th>開始時間</th>
+                        <th>結束時間</th>
+                        <th>狀態</th>
+                    </tr>
+                </thead>
+                <tbody class="hostGroup-list-table-table-tbody">
+                    <tr v-for="list in filteredData" :key="list.id">
+                        <td>{{ list.campaign }}</td>
+                        <td>{{ list.totaldiscount }}</td>
+                        <td>{{ list.totalprice }}</td>
+                        <td>{{ list.afterdiscount }}</td>
+                        <td>{{ list.membercount }}</td>
+                        <td>{{ list.start }}</td>
+                        <td>{{ list.finish }}</td>
+                        <td>{{ list.status }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div id='myDiv'><!-- Plotly chart will be drawn inside this DIV --></div>
 </template>
 
 <style scoped>
@@ -85,6 +146,34 @@ export default{
   position: absolute;
   top: 35px;
   left: 250px;
+}
+
+.search-range-content{
+    display: flex;
+    background-color: #ececec;
+}
+
+.search-range{
+    display: flex;
+    width: 1220px;
+    margin: auto;
+    margin-top: 20px;
+}
+
+.search-range-start-end{
+    margin-right: 20px;
+    font-size: 18px;
+}
+
+.search-range-start-end input{
+    font-size: 18px;
+}
+
+.search-range-start-end-button{
+    padding: 5px 10px;
+    background-color: #e72410;
+    color: #ffffff;
+    font-size: 16px;
 }
 
 .hostGroup-list{

@@ -356,7 +356,6 @@ namespace API.Controllers
                     var latestOrder = matchingOrder.OrderByDescending(o => o.id).FirstOrDefault();
 
                     latestOrder.campaign = matchingOrders[0].campaign;
-                    latestOrder.estimate = matchingOrders[0].estimate;
                     latestOrder.start = matchingOrders[0].start;
                     latestOrder.finish = matchingOrders[0].finish;
 

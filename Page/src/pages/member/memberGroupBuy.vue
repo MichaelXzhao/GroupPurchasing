@@ -17,6 +17,7 @@ export default{
         let imgurl = ref("")
         let discountData = ref({})
         let loadingDisplay = ref(false)
+        let hashrecommender = ref("")
         let addqty = (qty)=>{
             inputqty.value = changeqty.addqty(qty)
         }
@@ -58,6 +59,14 @@ export default{
                 // if(discountData.value.totalPayment!=0&&discountData.value.totalPrice){
                 //     data.value.price = data.value.price*(discountData.value.totalPayment/discountData.value.totalPrice)
                 // }
+                res.data.memberData.forEach(element=>{
+                    console.log(element.member)
+                    if(element.member === localStorage.getItem("username")){
+                        console.log(element.sharelink)
+                        hashrecommender.value = element.sharelink;
+                        return "";
+                    }
+                })
             })
             .catch(err=>{
                 console.log(err)
@@ -67,7 +76,7 @@ export default{
             })
         }
         let shareWeb = ()=>{
-            shareURL.shareURL(localStorage.getItem("username"))
+            shareURL.shareURL(hashrecommender.value)
         }
         let gotoProfile = ()=>{
             router.push({path:"/profile"})
@@ -98,8 +107,8 @@ export default{
             });
 
             loadingDisplay.value = true
-            console.log(import.meta.env.VITE_API_URL);
-            axios.get(import.meta.env.VITE_API_URL+"api/Order/Detail?salepageid=" + localStorage.getItem("salepageid"))
+            // console.log(import.meta.env.VITE_API_URL);
+            axios.get(import.meta.env.VITE_API_URL + "api/Order/Detail?salepageid=" + localStorage.getItem("salepageid"))
             .then(res=>{
                 console.log(res)
                 data.value = res.data
@@ -115,6 +124,14 @@ export default{
                 if(discountData.value.totalPayment!=0&&discountData.value.totalPrice){
                     data.value.price = data.value.price*(discountData.value.totalPayment/discountData.value.totalPrice)
                 }
+                res.data.memberData.forEach(element=>{
+                    console.log(element.member)
+                    if(element.member === localStorage.getItem("username")){
+                        console.log(element.sharelink)
+                        hashrecommender.value = element.sharelink;
+                        return "";
+                    }
+                })
             })
             .catch(err=>{
                 console.log(err)

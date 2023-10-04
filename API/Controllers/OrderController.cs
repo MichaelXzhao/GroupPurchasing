@@ -326,15 +326,15 @@ namespace API.Controllers
                     .Where(o => o.role != "host" && o.salepageid == input.salepageid && o.status == "開團中")
                     .ToListAsync();
 
-                if (matchingOrders.Any())
+                if (matchingOrders.Any()&& !matchingOrder.Any())
                 {
-                    // 符合條件的記錄，找到最新的記錄
+                }
+                else
+                {
                     var latestOrder = matchingOrder.OrderByDescending(o => o.id).FirstOrDefault();
-
                     latestOrder.campaign = matchingOrders[0].campaign;
                     latestOrder.start = matchingOrders[0].start;
                     latestOrder.finish = matchingOrders[0].finish;
-
                     await _dbcontext.SaveChangesAsync();
                 }
 

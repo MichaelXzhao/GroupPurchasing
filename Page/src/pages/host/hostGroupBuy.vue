@@ -17,6 +17,7 @@ export default{
         let imgurl = ref("")
         let loadingDisplay = ref(false)
         let discountData = ref({})
+        let hashrecommender = ref("")
         let addqty = (qty)=>{
             inputqty.value = changeqty.addqty(qty)
         }
@@ -69,7 +70,8 @@ export default{
             })
         }
         let shareWeb = ()=>{
-            shareURL.shareURL(localStorage.getItem("username"))
+            console.log(hashrecommender.value)
+            shareURL.shareURL(hashrecommender.value)
         }
         let insertCart = ()=>{
             window.scrollTo(0, 0);
@@ -92,6 +94,9 @@ export default{
         }
         let gotoProfile = ()=>{
             router.push({path:"/profile"})
+        }
+        let gotoDashboard = ()=>{
+            window.location.href = import.meta.env.VITE_API_URL+"dashboard"
         }
         onMounted(() => {
             let hubConnection = new signalR.HubConnectionBuilder()
@@ -119,7 +124,7 @@ export default{
             });
 
             loadingDisplay.value = true
-            console.log(import.meta.env.VITE_API_URL);
+            console.log(localStorage.getItem("salepageid"));
             axios.get(import.meta.env.VITE_API_URL+"api/Order/Detail?salepageid=" + localStorage.getItem("salepageid"))
             .then(res=>{
                 console.log(res)
@@ -136,6 +141,14 @@ export default{
                 if(discountData.value.totalPayment!=0&&discountData.value.totalPrice){
                     data.value.price = data.value.price*(discountData.value.totalPayment/discountData.value.totalPrice)
                 }
+                res.data.memberData.forEach(element=>{
+                    console.log(element.member)
+                    if(element.member === localStorage.getItem("username")){
+                        console.log(element.sharelink)
+                        hashrecommender.value = element.sharelink;
+                        return "";
+                    }
+                })
             })
             .catch(err=>{
                 console.log(err)
@@ -157,7 +170,8 @@ export default{
             joinGroupBuy,
             shareWeb,
             insertCart,
-            gotoProfile
+            gotoProfile,
+            gotoDashboard
         }
     },
     components: { 
@@ -174,6 +188,22 @@ export default{
             <img class="header-logo" src="../../img/Group2.svg" alt="">
         </div>
         <div v-on:click="gotoProfile">
+            <svg v-on:click="gotoDashboard" style="    width: 20px;height: 20px;position: absolute;right: 200px;margin-top: 45px;fill: #ffffff;" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" 
+                viewBox="0 0 487.3 487.3" xml:space="preserve">
+                <g>
+                    <g>
+                        <path d="M487.2,69.7c0,12.9-10.5,23.4-23.4,23.4h-322c-12.9,0-23.4-10.5-23.4-23.4s10.5-23.4,23.4-23.4h322.1
+                            C476.8,46.4,487.2,56.8,487.2,69.7z M463.9,162.3H141.8c-12.9,0-23.4,10.5-23.4,23.4s10.5,23.4,23.4,23.4h322.1
+                            c12.9,0,23.4-10.5,23.4-23.4C487.2,172.8,476.8,162.3,463.9,162.3z M463.9,278.3H141.8c-12.9,0-23.4,10.5-23.4,23.4
+                            s10.5,23.4,23.4,23.4h322.1c12.9,0,23.4-10.5,23.4-23.4C487.2,288.8,476.8,278.3,463.9,278.3z M463.9,394.3H141.8
+                            c-12.9,0-23.4,10.5-23.4,23.4s10.5,23.4,23.4,23.4h322.1c12.9,0,23.4-10.5,23.4-23.4C487.2,404.8,476.8,394.3,463.9,394.3z
+                            M38.9,30.8C17.4,30.8,0,48.2,0,69.7s17.4,39,38.9,39s38.9-17.5,38.9-39S60.4,30.8,38.9,30.8z M38.9,146.8
+                            C17.4,146.8,0,164.2,0,185.7s17.4,38.9,38.9,38.9s38.9-17.4,38.9-38.9S60.4,146.8,38.9,146.8z M38.9,262.8
+                            C17.4,262.8,0,280.2,0,301.7s17.4,38.9,38.9,38.9s38.9-17.4,38.9-38.9S60.4,262.8,38.9,262.8z M38.9,378.7
+                            C17.4,378.7,0,396.1,0,417.6s17.4,38.9,38.9,38.9s38.9-17.4,38.9-38.9C77.8,396.2,60.4,378.7,38.9,378.7z"/>
+                    </g>
+                </g>
+            </svg>
             <svg style="width: 30px;margin-top: 40px;position: absolute;right: 150px; border-radius: 50%; border-style: solid; border-color: #fff;border-width: 2px;" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 256 256" enable-background="new 0 0 256 256" xml:space="preserve">
             <g><g><g><path fill="#ffffff" d="M120.8,1c-7.2,0.8-17.6,3.8-24.1,7.1C77,18,63.6,35.5,58.6,57.6c-1.7,7.5-1.7,20.5,0,28.1c4.5,20.1,16.5,36.5,34.5,47c2.4,1.4,3.7,2.4,3.3,2.6c-0.4,0.2-3.4,1.2-6.7,2.4c-27.1,9.2-51.6,29.5-65.2,54c-7.8,14.1-12.6,29.6-14.1,45.6c-0.8,8.2-0.5,12.5,0.9,14.3c3.6,4.9,9.9,4.9,13.4,0c0.9-1.2,1.1-2.6,1.5-8.5c1-16.5,4.6-30,11.7-43.5c15.6-29.6,45-49.7,78.2-53.6c48.4-5.6,93.5,23,108.8,69.1c3.4,10.1,4.6,17.1,5.5,32.3c0.5,8.1,9.8,10.8,14.6,4.2c1-1.3,1.1-2.1,1-8.3c-0.3-27.1-12-54.7-32.1-75.5c-13.1-13.5-30.1-24.4-47.3-30.2c-3.3-1.1-6.3-2.2-6.7-2.3c-0.5-0.2,0.9-1.2,3.3-2.6c18.2-10.6,30.7-28,34.7-48.3c1.3-6.6,1.2-19.9-0.3-26.6c-6-28.1-26.4-48.8-54.4-55.3C138,1.2,126.1,0.5,120.8,1z M139.4,18c21.1,4.5,36.8,20,42.1,41.4c1.3,5.2,1.6,17.4,0.5,22.5c-2.5,11.3-7.1,20.2-14.7,28.1c-21.5,22.3-56.9,22.4-78.3,0.1c-7.7-8.1-12.4-16.9-14.8-28.2c-0.9-4.1-0.8-16.2,0-20.6c2.2-10.8,7.4-20.8,15.1-28.5c7.8-7.8,18.4-13.3,28.7-15c2.1-0.3,4.1-0.7,4.5-0.8C124.4,16.6,136.2,17.3,139.4,18z"/></g></g></g>
             </svg>

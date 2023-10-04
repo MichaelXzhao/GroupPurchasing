@@ -3,6 +3,7 @@ import { onMounted, ref } from 'vue';
 import Loading from "../components/Loading.vue"
 import router from '../router/router.js'
 import segmentatesalepageid from "../function/segmentatesalepageid.js"
+import axios from 'axios'
 
 export default{
     setup() {
@@ -10,10 +11,28 @@ export default{
         let groupbuyname = ref("")
         let startdate = ref("")
         let enddate = ref("")
-        let estimatemoney = ref("")
         let createGroupBuy =()=>{
             localStorage.setItem("username", username.value)
-            router.push({path:"/createGroupBuy/hostGroupBuy"})
+            localStorage.setItem("groupbuyname", groupbuyname.value)
+            localStorage.setItem("startdate", startdate.value)
+            localStorage.setItem("enddate", enddate.value)
+
+            axios.post(import.meta.env.VITE_API_URL + "api/Dashboard/Leader",{
+                user_name: localStorage.getItem("username"),
+                campaign: groupbuyname.value,
+                start: startdate.value,
+                finish: enddate.value,
+                salepageid: localStorage.getItem("salepageid")
+            })
+            .then(res=>{
+                console.log(res)
+            })
+            .catch(err=>{
+                console.log(err)
+            })
+            .finally(()=>{
+                router.push({path:"/createGroupBuy/hostGroupBuy"})
+            })
         }
         onMounted(() => {
             // console.log("HI");
@@ -24,7 +43,6 @@ export default{
             groupbuyname,
             startdate,
             enddate,
-            estimatemoney,
             createGroupBuy
         }
     },
@@ -55,14 +73,13 @@ export default{
             <div class="createGroupBuy-content-form-name">
                 <input type="text" class="createGroupBuy-content-form-name-input" placeholder="輸入團購名稱" v-model="groupbuyname">
             </div>
+            <label style="margin-left: 23px;" for="">輸入開始日期</label>
             <div class="createGroupBuy-content-form-name">
-                <input type="text" class="createGroupBuy-content-form-name-input" placeholder="輸入開始日期" v-model="startdate">
+                <input type="date" class="createGroupBuy-content-form-name-input" placeholder="輸入開始日期" v-model="startdate">
             </div>
+            <label style="margin-left: 23px;" for="">輸入結束日期</label>
             <div class="createGroupBuy-content-form-name">
-                <input type="text" class="createGroupBuy-content-form-name-input" placeholder="輸入結束日期" v-model="enddate">
-            </div>
-            <div class="createGroupBuy-content-form-name">
-                <input type="number" class="createGroupBuy-content-form-name-input" placeholder="預計銷售金額" v-model="estimatemoney">
+                <input type="date" class="createGroupBuy-content-form-name-input" placeholder="輸入結束日期" v-model="enddate">
             </div>
             <div class="createGroupBuy-content-form-button">
                 <button class="createGroupBuy-content-form-button-button" v-on:click="createGroupBuy">開團</button>

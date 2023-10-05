@@ -255,13 +255,14 @@ namespace API.Controllers
 
 
                 var existingOrder = await _dbcontext.Orders
-                    .FirstOrDefaultAsync(o => o.sharelink == input.sharelink);
+                    .FirstOrDefaultAsync(o => o.sharelink == input.recommender);
 
                 var recommender = string.Empty;
                 if (existingOrder != null)
                 {
                     // 找到具有相同sharelink的訂單，取其member
                     recommender = existingOrder.member;
+                    Console.WriteLine("recommender:"+recommender);
                 }
 
 

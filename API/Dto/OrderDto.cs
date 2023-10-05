@@ -8,7 +8,7 @@ public class AddOrderDto
     public string salepageid { get; set; }
     public string shopid { get; set; }
     public string skuid { get; set; }
-    public string? sharelink { get;set;} = null;
+    public string? recommender { get;set;} = null;
 }
 
 

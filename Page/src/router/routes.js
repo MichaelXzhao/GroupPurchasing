@@ -30,6 +30,10 @@ const routes = [
     {
         path:"/dashboard",
         component:()=>import("../pages/host/hostDashBoard.vue")
+    },
+    {
+        path:"/orderlist",
+        component:()=>import("../pages/host/hostOrderList.vue")
     }
 ]
 

@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json.Linq;
 using System.Text;
 using API.Models;
+using System.Security.Cryptography;
 
 namespace API.Controllers
 {
@@ -54,12 +55,13 @@ namespace API.Controllers
         }
 
         string OrderCode;
+        string PayPageUrl;
 
         [HttpPost]
         [Route("/Carts/Checkout")]
         public async Task<IActionResult> Insert(CartCheckoutDto input)
         {
-            string cookie = "uAUTH=uMy2bMc8RrP/BWJadbxhFSSX4Xb5nYYE2fuRASj+cCC/Xi6OikbdSG80O7WvAiP72404zwY2pA4u73mgqah5lnn0hUf5h45B/VN093nHYp8=; uAUTH_samesite=uMy2bMc8RrP/BWJadbxhFSSX4Xb5nYYE2fuRASj+cCC/Xi6OikbdSG80O7WvAiP72404zwY2pA4u73mgqah5lnn0hUf5h45B/VN093nHYp8=; ai_user=DRG7d|2023-09-21T02:48:11.332Z; gaClientId=eed70906-4b5f-423d-abb7-33af67c24a90; GUID=83748c63-df5f-4a1f-a4db-e4fbda245196; __lt__cid=694bb7e5-b6db-47e9-b5f5-1ed67d9e2bc1; _fbp=fb.1.1695264492779.296659842; allowGetPrivacyInfo=true; isPromotion20658AlreadyPrompt=true; isPromotion21302AlreadyPrompt=true; isPromotion21194AlreadyPrompt=true; isPromotion20938AlreadyPrompt=true; isPromotion19570AlreadyPrompt=true; auth=od+XMJjXjeNCLaky+2jWLzZnc35kjQf2Ibdhll/HTXRIpShGsFU3jfr31DRt30aqySi/a5psRsV04FEFdQJhTG0M60iYj8i8gRCo2+QYWgMfaG+l8WUa908EbvZduhDFyfH71UxlEotd/ulKr2lfKt2vq79KdZlkGrOssgCSVXKOadf45kcTs36P39rrQtDvMcZMV7pmNowEoJN82AbkFOhpc6NHAYPJo2GWY8tixVgYhbfcn1//fOnHRuPJ9cv8Y6MI9bcy10iyDgBLuGC111Mb9EJy48s40dajZrDqB61HnpbEWDfiMn3YQEvt7XpvkHBJrZWwxZP7o3olZRqEE9Jp0THUcVVtiGtLKOLJfhc7BPK7kgfjrHG1G6uQARaD/2yebPw0essdbgYzEOs1SckTloA3svEW30Dp9yn94tyIBOe2sq3+u4yjT91OiVGDf8GbfozRBLNsW41xetGPvutuoO+RrJweRLfaJ31CCwQosQs/dV9IVPYTvS6AZYwpD1UceSxwFkHEnL9VzDDNmYwYZkvNOp6ZW6/Nd6954NnQBZpDLGsqf7SfWHG/Qz5cesFQz/D4kzO71RB9rYOZJzcymXVX2x8y1/JrLxmHbe+dfnOG26yalRXUH4tHXDkiQeCtA7aM2k4iIW4VSUh+8DJcx2Jk37mEKzwzGieXyhqWaLIAEMHPKuUuIV0e4CD2d98k0UqV/koPMUbejhXPuWxk+J9G0qMGKYI0WGhBIY+zzbSp2q8L3GVa56GglVAZYubSRTb68mAd1y3JtTdN7Jc0gVV9MhaW31gE1pFn9G4=; auth_samesite=od+XMJjXjeNCLaky+2jWLzZnc35kjQf2Ibdhll/HTXRIpShGsFU3jfr31DRt30aqySi/a5psRsV04FEFdQJhTG0M60iYj8i8gRCo2+QYWgMfaG+l8WUa908EbvZduhDFyfH71UxlEotd/ulKr2lfKt2vq79KdZlkGrOssgCSVXKOadf45kcTs36P39rrQtDvMcZMV7pmNowEoJN82AbkFOhpc6NHAYPJo2GWY8tixVgYhbfcn1//fOnHRuPJ9cv8Y6MI9bcy10iyDgBLuGC111Mb9EJy48s40dajZrDqB61HnpbEWDfiMn3YQEvt7XpvkHBJrZWwxZP7o3olZRqEE9Jp0THUcVVtiGtLKOLJfhc7BPK7kgfjrHG1G6uQARaD/2yebPw0essdbgYzEOs1SckTloA3svEW30Dp9yn94tyIBOe2sq3+u4yjT91OiVGDf8GbfozRBLNsW41xetGPvutuoO+RrJweRLfaJ31CCwQosQs/dV9IVPYTvS6AZYwpD1UceSxwFkHEnL9VzDDNmYwYZkvNOp6ZW6/Nd6954NnQBZpDLGsqf7SfWHG/Qz5cesFQz/D4kzO71RB9rYOZJzcymXVX2x8y1/JrLxmHbe+dfnOG26yalRXUH4tHXDkiQeCtA7aM2k4iIW4VSUh+8DJcx2Jk37mEKzwzGieXyhqWaLIAEMHPKuUuIV0e4CD2d98k0UqV/koPMUbejhXPuWxk+J9G0qMGKYI0WGhBIY+zzbSp2q8L3GVa56GglVAZYubSRTb68mAd1y3JtTdN7Jc0gVV9MhaW31gE1pFn9G4=; MID=4800747206; isPromotion19213AlreadyPrompt=true; isPromotion20859AlreadyPrompt=true; lang=zh-TW; _clck=jho68m|2|ffm|0|1359; currency=TWD; __lt__sid=5c4bce63-d21ebabc; 91_FPID_v3_4_1=df26cef9cad065d7525ec9f16b51a2fe; fr=; fr2=; salePageViewList=888399; _gat=1; ai_session=Z7D08|1696558834294|1696559077507.8; _clsk=1xonhz|1696559077791|4|1|s.clarity.ms/collect";
+            string cookie = "uAUTH=uMy2bMc8RrP/BWJadbxhFSSX4Xb5nYYE2fuRASj+cCC/Xi6OikbdSG80O7WvAiP72404zwY2pA4u73mgqah5lnn0hUf5h45B/VN093nHYp8=; uAUTH_samesite=uMy2bMc8RrP/BWJadbxhFSSX4Xb5nYYE2fuRASj+cCC/Xi6OikbdSG80O7WvAiP72404zwY2pA4u73mgqah5lnn0hUf5h45B/VN093nHYp8=; ai_user=DRG7d|2023-09-21T02:48:11.332Z; gaClientId=eed70906-4b5f-423d-abb7-33af67c24a90; GUID=83748c63-df5f-4a1f-a4db-e4fbda245196; __lt__cid=694bb7e5-b6db-47e9-b5f5-1ed67d9e2bc1; _fbp=fb.1.1695264492779.296659842; allowGetPrivacyInfo=true; isPromotion20658AlreadyPrompt=true; isPromotion21302AlreadyPrompt=true; isPromotion21194AlreadyPrompt=true; isPromotion20938AlreadyPrompt=true; isPromotion19570AlreadyPrompt=true; auth=od+XMJjXjeNCLaky+2jWLzZnc35kjQf2Ibdhll/HTXRIpShGsFU3jfr31DRt30aqySi/a5psRsV04FEFdQJhTG0M60iYj8i8gRCo2+QYWgMfaG+l8WUa908EbvZduhDFyfH71UxlEotd/ulKr2lfKt2vq79KdZlkGrOssgCSVXKOadf45kcTs36P39rrQtDvMcZMV7pmNowEoJN82AbkFOhpc6NHAYPJo2GWY8tixVgYhbfcn1//fOnHRuPJ9cv8Y6MI9bcy10iyDgBLuGC111Mb9EJy48s40dajZrDqB61HnpbEWDfiMn3YQEvt7XpvkHBJrZWwxZP7o3olZRqEE9Jp0THUcVVtiGtLKOLJfhc7BPK7kgfjrHG1G6uQARaD/2yebPw0essdbgYzEOs1SckTloA3svEW30Dp9yn94tyIBOe2sq3+u4yjT91OiVGDf8GbfozRBLNsW41xetGPvutuoO+RrJweRLfaJ31CCwQosQs/dV9IVPYTvS6AZYwpD1UceSxwFkHEnL9VzDDNmYwYZkvNOp6ZW6/Nd6954NnQBZpDLGsqf7SfWHG/Qz5cesFQz/D4kzO71RB9rYOZJzcymXVX2x8y1/JrLxmHbe+dfnOG26yalRXUH4tHXDkiQeCtA7aM2k4iIW4VSUh+8DJcx2Jk37mEKzwzGieXyhqWaLIAEMHPKuUuIV0e4CD2d98k0UqV/koPMUbejhXPuWxk+J9G0qMGKYI0WGhBIY+zzbSp2q8L3GVa56GglVAZYubSRTb68mAd1y3JtTdN7Jc0gVV9MhaW31gE1pFn9G4=; auth_samesite=od+XMJjXjeNCLaky+2jWLzZnc35kjQf2Ibdhll/HTXRIpShGsFU3jfr31DRt30aqySi/a5psRsV04FEFdQJhTG0M60iYj8i8gRCo2+QYWgMfaG+l8WUa908EbvZduhDFyfH71UxlEotd/ulKr2lfKt2vq79KdZlkGrOssgCSVXKOadf45kcTs36P39rrQtDvMcZMV7pmNowEoJN82AbkFOhpc6NHAYPJo2GWY8tixVgYhbfcn1//fOnHRuPJ9cv8Y6MI9bcy10iyDgBLuGC111Mb9EJy48s40dajZrDqB61HnpbEWDfiMn3YQEvt7XpvkHBJrZWwxZP7o3olZRqEE9Jp0THUcVVtiGtLKOLJfhc7BPK7kgfjrHG1G6uQARaD/2yebPw0essdbgYzEOs1SckTloA3svEW30Dp9yn94tyIBOe2sq3+u4yjT91OiVGDf8GbfozRBLNsW41xetGPvutuoO+RrJweRLfaJ31CCwQosQs/dV9IVPYTvS6AZYwpD1UceSxwFkHEnL9VzDDNmYwYZkvNOp6ZW6/Nd6954NnQBZpDLGsqf7SfWHG/Qz5cesFQz/D4kzO71RB9rYOZJzcymXVX2x8y1/JrLxmHbe+dfnOG26yalRXUH4tHXDkiQeCtA7aM2k4iIW4VSUh+8DJcx2Jk37mEKzwzGieXyhqWaLIAEMHPKuUuIV0e4CD2d98k0UqV/koPMUbejhXPuWxk+J9G0qMGKYI0WGhBIY+zzbSp2q8L3GVa56GglVAZYubSRTb68mAd1y3JtTdN7Jc0gVV9MhaW31gE1pFn9G4=; MID=4800747206; isPromotion19213AlreadyPrompt=true; isPromotion20859AlreadyPrompt=true; lang=zh-TW; _clck=jho68m|2|ffm|0|1359; currency=TWD; 91_FPID_v3_4_1=df26cef9cad065d7525ec9f16b51a2fe; fr=; fr2=; salePageViewList=888399; __lt__sid=5c4bce63-fda469b8; _gat=1; ai_session=j+4xB|1696585458254|1696586098009.6; _clsk=1vvjy7j|1696586098284|12|1|s.clarity.ms/collect";
 
             try
             {
@@ -232,10 +234,16 @@ namespace API.Controllers
 
                 // 讀取回傳response
                 string responseCheckOrderContent = await responseCheckOrder.Content.ReadAsStringAsync();
-                //Console.WriteLine(responseCheckOrderContent);
+                Console.WriteLine(responseCheckOrderContent);
                 JObject jsonCheckOrderResponse = JObject.Parse(responseCheckOrderContent);
                 OrderCode = jsonCheckOrderResponse["Data"]["TradesOrderGroupList"][0]["Code"].ToString();
+                var OrderTitle = jsonCheckOrderResponse["Data"]["TradesOrderGroupList"][0]["TradesOrderList"][0]["TradesOrderSlaveList"][0]["SaleProductTitle"];
+                var OrderPic = jsonCheckOrderResponse["Data"]["TradesOrderGroupList"][0]["TradesOrderList"][0]["TradesOrderSlaveList"][0]["PicUrl"];
+                var OrderTotal = jsonCheckOrderResponse["Data"]["TradesOrderGroupList"][0]["TotalPayment"];
                 Console.WriteLine("訂單編號: "+OrderCode);
+                Console.WriteLine("訂單商品: "+OrderTitle);
+                Console.WriteLine("訂單圖片: "+OrderPic);
+                Console.WriteLine("訂單金額: "+OrderTotal);
 
                 // 更改付款狀態為paid
                 var orders = await _dbcontext.Orders
@@ -247,6 +255,34 @@ namespace API.Controllers
                     order.status = "已結團"; 
                 }
                 await _dbcontext.SaveChangesAsync();
+
+                string text = "{\"merchantOrderId\":\""+OrderCode+"\",\"expireTime\":14400,\"productTitle\":\""+OrderTitle+"\",\"productDetail\":\"測試詳細\",\"productImageUrl\":\""+OrderPic+"\",\"isShippingOnlyDisplay\":true,\"shippingType\":[\"宅配\"],\"shippingAddress\": \"台南市中西區*********3號\",\"cardHolder\":{    \"phoneNumber\":\"0987878787\",    \"name\":\"李小華\",    \"email\":null},\"productType\":\"\",\"isThreeDSecure\": true,\"amount\":"+OrderTotal+",\"payType\":[\"CreditCardOnce\"],\"returnUrl\":\"http://localhost:9191/result\",\"notifyUrl\": \"https://www.google.com.tw/?hl=zh_TW\",\"invoiceType\":2,\"invoiceTaxId\":55665566,\"invoiceTitle\":\"91App\",\"invoiceCarrier\":\"悠遊卡\",\"isInvoiceDonate\":false,\"invoiceDonatedOrganization\":null}";
+                var hashText = text.ToHMACSHA256String("nOCsqYwd+4ZqovrmFQ1sQg==").ToLower();
+                Console.WriteLine(text);
+                var base64HashText = Convert.ToBase64String(Encoding.UTF8.GetBytes(hashText));
+                Console.WriteLine(base64HashText);
+                //[post API] 91pay
+                HttpClient clientPay = new HttpClient();
+                HttpRequestMessage requestPay = new HttpRequestMessage()
+                {
+                    Method = HttpMethod.Post,
+                    RequestUri = new Uri("https://api.payments.qa.91dev.tw/v2/pay-pages/url"),
+                    Headers =
+                    {
+                        { "N1-API-KEY", "8E45WzOQYFcxTrLl7uPCJCL53KmcqWcsUTjFvJyl" },
+                        { "N1-DATA-SIGNATURE", base64HashText },
+                    },
+                };
+
+                requestPay.Content = new StringContent(text, Encoding.UTF8, "application/json");
+
+                HttpResponseMessage responsePay = await clientPay.SendAsync(requestPay);
+
+                // 讀取回傳response
+                string responsePayContent = await responsePay.Content.ReadAsStringAsync();
+                Console.WriteLine(responsePayContent);
+                JObject jsonPayResponse = JObject.Parse(responsePayContent);
+                PayPageUrl = jsonPayResponse["payPageUrl"].ToString();
    
             }
             catch (Exception ex) 
@@ -255,7 +291,30 @@ namespace API.Controllers
             }
             return Ok(new {
                 orderNumber = OrderCode,
+                payPageUrl = PayPageUrl,
             });
+        }
+    }
+
+    public static partial class StringExtensions
+    {
+        /// <summary>
+        /// ToHMACSHA256String
+        /// </summary>
+        /// <param name="str">來源字串</param>
+        /// <param name="key">金鑰</param>
+        /// <returns>雜湊長度64的字串</returns>
+        public static string ToHMACSHA256String(this string str, string key)
+        {
+            var encoding = new System.Text.UTF8Encoding();
+            byte[] keyByte = encoding.GetBytes(key);
+            byte[] inputDataBytes = encoding.GetBytes(str);
+            using (var hmacsha256 = new HMACSHA256(keyByte))
+            {
+                byte[] hashmessage = hmacsha256.ComputeHash(inputDataBytes);
+
+                return BitConverter.ToString(hashmessage).Replace("-", string.Empty);
+            }
         }
     }
 }

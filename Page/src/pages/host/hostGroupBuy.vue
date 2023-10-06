@@ -84,12 +84,13 @@ export default{
             }).then(res=>{
                 console.log(res)
                 localStorage.setItem("orderNumber", res.data.orderNumber)
+                location.href = res.data.payPageUrl;
             }).catch(err=>{
                 console.log(err)
             })
             .finally(()=>{
                 loadingDisplay.value = false
-                router.push({path:"/result"})
+                // router.push({path:"/result"})
             })
         }
         let gotoProfile = ()=>{

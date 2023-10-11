@@ -12,9 +12,10 @@ builder.Services.AddCors(options =>
     options.AddPolicy("MyAllowedOrigins",
         policy =>
         {
-            policy.AllowAnyOrigin() // note the port is included 
-                .AllowAnyHeader()
-                .AllowAnyMethod();
+            policy.WithOrigins("http://localhost:5173") // 允許這個來源
+                  .AllowAnyHeader()
+                  .AllowAnyMethod()
+                  .AllowCredentials(); // 允許認證信息
         });
 });
 

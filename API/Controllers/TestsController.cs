@@ -19,6 +19,7 @@ namespace API.Controllers
         public async Task<IActionResult> Test()
         {
             string cartUniqueKey = await _orderService.GetCartDetail();
+            Console.WriteLine(cartUniqueKey);
             return Ok(cartUniqueKey);
         }
     }

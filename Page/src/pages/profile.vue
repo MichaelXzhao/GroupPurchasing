@@ -2,12 +2,16 @@
 import { onMounted, ref } from 'vue';
 import axios from 'axios'
 import Loading from "../components/Loading.vue"
+import router from '../router/router';
 
 export default{
     setup() {
         let data = ref({})
         let username = ref(localStorage.getItem("username"))
         let recommendData = ref([])
+        let gotoGroupBuy = ()=>{
+            router.push({path:"/createGroupBuy/hostGroupBuy"})
+        }
         onMounted(() => {
             axios.get(import.meta.env.VITE_API_URL + `api/Profile/Recommendation?username=${localStorage.getItem("username")}`)
             .then(res=>{
@@ -22,7 +26,8 @@ export default{
         return {
             data,
             username,
-            recommendData
+            recommendData,
+            gotoGroupBuy
         }
     },
     components: { Loading }
@@ -31,7 +36,7 @@ export default{
 
 <template>
     <div class="layout-header-fix">
-        <div class="layout-header-fix-logo">
+        <div class="layout-header-fix-logo" v-on:click="gotoGroupBuy">
             <img style="height: 100px;" src="../img/169545314870657.png" alt="">
             <img class="header-logo" src="../img/Group2.svg" alt="">
         </div>

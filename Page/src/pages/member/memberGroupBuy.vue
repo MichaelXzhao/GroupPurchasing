@@ -281,7 +281,7 @@ export default{
 
 <style scoped>
 .layout-header-fix{
-  background-color: #e72410;
+  background-color: #2e6474;
   height: 100px;
   display: flex;
   position: relative;
@@ -339,7 +339,7 @@ export default{
 
 .hostGroupBuy-content-right-price{
     font-size: 30px;
-    color: #e72410;
+    color: #e77110db;
     margin-top: 30px;
     margin-bottom: 30px;
 }
@@ -429,8 +429,8 @@ input[type="number"]::-webkit-outer-spin-button {
 }
 
 .hostGroupBuy-content-right-color-content-groupbuy-button{
-    border: #e72410 solid 1px;
-    background-color: #e72510db;
+    border: #2e6474 solid 1px;
+    background-color: #2e6474;
     color: #ffffff;
     width: 120px;
     font-size: 16px;
@@ -438,8 +438,8 @@ input[type="number"]::-webkit-outer-spin-button {
 }
 
 .hostGroupBuy-content-right-color-content-share-button{
-    border: #1049e7 solid 1px;
-    background-color: #1049e7db;
+    border: #e77110db solid 1px;
+    background-color: #e77110db;
     color: #ffffff;
     width: 120px;
     font-size: 16px;

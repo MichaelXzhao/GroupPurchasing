@@ -71,18 +71,18 @@ export default{
         <div class="hostGroup-list-table" v-for="list in data">
             <div class="orderlist">
                 <div class="orderlist-item">
-                    <div style="color: #e72410;margin-bottom: 10px; ">{{ list.paytype }}</div>
+                    <!-- <div style="color: #e72410;margin-bottom: 10px; ">{{ list.paytype }}</div> -->
                     <div class="orderlist-first">
-                        <div>商品名稱:{{ list.title }}</div>
+                        <div style="color: #e72410">商品名稱:{{ list.title }}</div>
                         <div>
                             訂購日期:{{ list.date }}
                         </div>
                     </div>
                     <div class="orderlist-number">
-                        <div>訂單編號:TG231006K00040</div>
+                        <div>訂單編號:{{list.orderCode}}</div>
                     </div>
                     <div class="orderlist-totalprice">
-                        <div>訂購總額:19999</div>
+                        <div>訂購總額:{{ list.totalprice }}</div>
                     </div>
                 </div>
                 <div class="orderlist-img">
